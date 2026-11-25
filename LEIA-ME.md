@@ -2,7 +2,17 @@
 
 Página de apresentação e venda do Hawk, com os Termos de uso e a Política de Privacidade. É HTML, CSS e JS puros, sem framework e sem build.
 
-**Ainda não está publicada.** A ideia é publicar no GitHub Pages, em `https://persith.github.io/hawk-site/`. O Mercado Pago pede esse endereço para ativar o ambiente de produção, e o Google pede a Política de Privacidade para publicar o login.
+**Publicado em 25/11/2026** em **https://persith.github.io/hawk-site/**, pelo GitHub Pages do repositório público `Persith/hawk-site` (branch `main`, pasta raiz). Esse repositório contém só esta pasta.
+
+**Para republicar depois de mudar algo aqui** (na pasta do projeto, depois de commitar):
+
+```
+git subtree split -P site -b site-pages
+git push https://github.com/Persith/hawk-site.git site-pages:main
+git branch -D site-pages
+```
+
+Em 1 ou 2 minutos, o Pages atualiza sozinho. A rede do PC do serviço bloqueia `api.github.com` (o `gh` não funciona lá), mas o `git push` funciona.
 
 ## Arquivos
 - `index.html`: a landing page, com visual inspirado no site do Discord (fundo azul-marinho com estrelas, títulos grandes, seções alternadas). Ela tem:
@@ -50,11 +60,7 @@ Depois abra `http://127.0.0.1:8765`. Abrir o `index.html` com dois cliques tamb�
 
    Sem isso, os botões de comprar do site mostram "ainda não está à venda".
 4. **Publicar uma versão do Hawk com a Conta e Licença** pelo `scripts\publicar.ps1`. A `v2.0.2` do `hawk-releases` ainda não tem login nem compra.
-5. **Escolher onde hospedar:**
-   - **Opção A:** um repositório público novo, `Persith/hawk-site`, só com esta pasta, e o Pages ligado. O endereço fica `persith.github.io/hawk-site`.
-   - **Opção B:** ligar o Pages no `Persith/hawk-releases`, que já é público, numa pasta `docs/`. O endereço fica `persith.github.io/hawk-releases`.
-   - Em qualquer opção, dá para usar um domínio próprio depois.
-6. **Depois de publicar:**
+5. **Agora que está publicado:**
    - colocar o endereço nas **Redirect URLs** do Supabase, para o "Entrar com Google" voltar ao site;
    - usar o endereço no formulário **Ativar produção** do Mercado Pago;
    - usar `.../termos.html#privacidade` no Google Auth Platform.
