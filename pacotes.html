@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pacotes de expansão · Hawk</title>
+  <meta name="description" content="O que vem no Pacote Desenvolvedor e no Pacote LAN Local do Hawk.">
+  <meta name="theme-color" content="#0a0f3a">
+  <link rel="icon" href="assets/hawk-icone.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://qtflyunebpskussorwjf.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://accounts.google.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Icons (Lucide style), used with <svg><use href="#i-..."/></svg> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4"/><path d="M12 14l3-3"/><circle cx="12" cy="14" r="8"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7c3.5 4 6 7.2 6 10.3a6 6 0 0 1-12 0c0-3.1 2.5-6.3 6-10.3z"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></symbol>
+    <symbol id="i-head" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
+    <symbol id="i-mouse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M7 15h10"/></symbol>
+    <symbol id="i-monitors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="9" height="7" rx="1.5"/><rect x="13" y="4" width="9" height="7" rx="1.5"/><path d="M6.5 15v-4M17.5 15v-4M4 15h16v5H4z"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 4-4 4h-2a2 2 0 0 0-1.4 3.4A1.7 1.7 0 0 1 12 22z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15.5" cy="7.5" r="1"/></symbol>
+    <symbol id="i-pipette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 9h8M12 9v7"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-windows" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.4v7.1H3zM11.5 4.3 21 3v8.5h-9.5zM3 12.5h7.5v7.1L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  </defs>
+</svg>
+<header class="top scrolled" id="top">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/hawk-icone.svg" alt="">Hawk</a>
+    <nav class="nav">
+      <a href="index.html#recursos">Recursos</a>
+      <a href="index.html#olhos">Olhos</a>
+      <a href="index.html#precos">Preços</a>
+      <a href="index.html#duvidas">Dúvidas</a>
+      <button class="btn btn-ghost btn-sm acct" id="acctBtn" type="button"><span class="acct-ava" hidden></span><span class="acct-txt">Entrar</span></button>
+      <a class="btn btn-light btn-sm" href="index.html#baixar">Baixar</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero stars">
+    <div class="wrap">
+      <a class="back-link" href="index.html#precos">← Voltar aos preços</a>
+      <h1 class="display">Pacotes de expansão</h1>
+      <p class="lead">Mais recursos para o seu Hawk. Cada pacote é pago uma vez só e fica na sua conta para sempre. Os dois vêm juntos no Hawk Completo.</p>
+      <div class="cta">
+        <a class="btn btn-ghost" href="#dev">Pacote Desenvolvedor</a>
+        <a class="btn btn-ghost" href="#lan">Pacote LAN Local</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature">
+    <div class="wrap packs-page">
+      <div class="pack-head reveal" id="dev">
+        <div class="pack-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></div>
+        <div class="pack-head-text">
+          <h2 class="display">Pacote Desenvolvedor</h2>
+          <p>Ferramentas para quem programa, testa sistemas ou mexe com muitos arquivos.</p>
+        </div>
+        <div class="pack-head-buy">
+          <div class="val">R$ 7,90 <small>único</small></div>
+          <button class="btn btn-light buy" data-item="pacote-dev">Comprar</button>
+        </div>
+      </div>
+      <div class="feature-card stack reveal" id="kit">
+        <div class="stack-text">
+          <div>
+            <div class="kicker"><span class="dot"></span>Kit Desenvolvedor</div>
+            <h2 class="display">Oito ferramentas a um clique</h2>
+          </div>
+          <div>
+            <p>Geradores e validadores para testar cadastros e sistemas, e utilitários de texto. Cada ferramenta abre na sua própria janela, direto do painel do Hawk.</p>
+            <ul><li><svg><use href="#i-check"/></svg>CPF (por estado) e CNPJ (numérico ou alfanumérico), com ou sem pontuação</li><li><svg><use href="#i-check"/></svg>Placas Mercosul e do padrão antigo, e números do Cartão do SUS</li><li><svg><use href="#i-check"/></svg>Cartões de crédito fictícios válidos por bandeira, para testar pagamentos</li><li><svg><use href="#i-check"/></svg>Contador de caracteres, palavras e linhas, e comparador de dois textos</li><li><svg><use href="#i-check"/></svg>Leitor de QR Code: tira o link ou o texto de uma imagem ou print</li></ul>
+          </div>
+        </div>
+        <div class="visual"><div class="shot-frame"><img src="assets/pacotes/devkit.png" alt="Painel do Hawk com as oito ferramentas do Kit Desenvolvedor" loading="lazy"></div></div>
+      </div>
+      <div class="feature-card stack reveal" id="converter">
+        <div class="stack-text">
+          <div>
+            <div class="kicker"><span class="dot"></span>Converter Arquivo</div>
+            <h2 class="display">Arraste e converta na hora</h2>
+          </div>
+          <div>
+            <p>Arraste um arquivo em qualquer lugar do Windows e o Hawk abre pronto para recebê-lo. Ele descobre o que o arquivo é de verdade e mostra só os formatos possíveis.</p>
+            <ul><li><svg><use href="#i-check"/></svg>Imagens e fotos (HEIC, RAW, PSD) para JPG, PNG, WEBP, AVIF, ICO, SVG e outros</li><li><svg><use href="#i-check"/></svg>Vídeo para áudio, GIF ou quadros; PDF para imagens; documentos para PDF</li><li><svg><use href="#i-check"/></svg>Tira o texto de uma imagem (OCR) e salva em TXT</li><li><svg><use href="#i-check"/></svg>Funciona sem internet: tudo é feito no seu PC</li></ul>
+          </div>
+        </div>
+        <div class="visual"><div class="shot-frame"><img src="assets/pacotes/converter.png" alt="Painel do Hawk mostrando os formatos para converter uma foto HEIC" loading="lazy"></div></div>
+      </div>
+      <div class="feature-card stack reveal" id="markitdown">
+        <div class="stack-text">
+          <div>
+            <div class="kicker"><span class="dot"></span>MarkItDown</div>
+            <h2 class="display">Qualquer arquivo vira Markdown</h2>
+          </div>
+          <div>
+            <p>Transforme documentos em texto Markdown (.md), o formato ideal para mandar para IAs como o Claude e o ChatGPT. Usa o MarkItDown, da Microsoft, que o Hawk prepara sozinho.</p>
+            <ul><li><svg><use href="#i-check"/></svg>PDF, Word, PowerPoint, Excel, HTML, CSV, JSON, XML e ZIP</li><li><svg><use href="#i-check"/></svg>Links do YouTube viram texto com a transcrição do vídeo</li><li><svg><use href="#i-check"/></svg>Áudio vira texto com a transcrição da fala</li><li><svg><use href="#i-check"/></svg>Opcional: descrição das imagens feita pela sua IA, com a sua chave</li></ul>
+          </div>
+        </div>
+        <div class="visual"><div class="shot-frame"><img src="assets/pacotes/markitdown.png" alt="Janela do Conversor MarkItDown com os formatos suportados" loading="lazy"></div></div>
+      </div>
+      <div class="pack-head reveal" id="lan">
+        <div class="pack-ico"><svg><use href="#i-monitors"/></svg></div>
+        <div class="pack-head-text">
+          <h2 class="display">Pacote LAN Local</h2>
+          <p>Para quem usa mais de um computador ou quer o celular conectado ao PC pela rede de casa.</p>
+        </div>
+        <div class="pack-head-buy">
+          <div class="val">R$ 7,90 <small>único</small></div>
+          <button class="btn btn-light buy" data-item="pacote-lan">Comprar</button>
+        </div>
+      </div>
+      <div class="feature-card stack reveal" id="mouse">
+        <div class="stack-text">
+          <div>
+            <div class="kicker"><span class="dot"></span>Compartilhamento de mouse e teclado</div>
+            <h2 class="display">Um mouse e um teclado para dois PCs</h2>
+          </div>
+          <div>
+            <p>Leve o cursor até a borda da tela e ele passa para o outro computador da mesma rede, junto com o teclado. Sem cabo e sem trocar de periférico.</p>
+            <ul><li><svg><use href="#i-check"/></svg>Escolha por qual borda e por qual monitor o mouse passa</li><li><svg><use href="#i-check"/></svg>Copie e cole texto e arquivos entre os PCs, ou arraste pela borda</li><li><svg><use href="#i-check"/></svg>Veja a tela do outro PC e controle de lá, sempre com permissão</li><li><svg><use href="#i-check"/></svg>Pareamento com código de 6 dígitos e conexão criptografada</li><li><svg><use href="#i-check"/></svg>Ctrl + Alt + Esc solta o controle na hora, a qualquer momento</li></ul>
+          </div>
+        </div>
+        <div class="visual"><div class="shot-frame"><img src="assets/pacotes/mouse.png" alt="Janela do Compartilhamento de Mouse com dois computadores pareados e dois monitores" loading="lazy"></div></div>
+      </div>
+      <div class="feature-card stack reveal" id="celular">
+        <div class="stack-text">
+          <div>
+            <div class="kicker"><span class="dot"></span>Gerenciar arquivos do celular</div>
+            <h2 class="display">Os arquivos do celular no seu PC</h2>
+          </div>
+          <div>
+            <p>Conecte o celular Android pelo Wi-Fi com o app Hawk Arquivos e cuide dos arquivos dele numa janela grande, sem cabo.</p>
+            <ul><li><svg><use href="#i-check"/></svg>Navegue pelas pastas, imagens, vídeos e áudios</li><li><svg><use href="#i-check"/></svg>Envie arquivos para o celular ou baixe para o PC, até arrastando do Windows</li><li><svg><use href="#i-check"/></svg>Encontre arquivos pesados, duplicados e lixo temporário para liberar espaço</li><li><svg><use href="#i-check"/></svg>Veja a bateria, o espaço livre e os apps instalados</li><li><svg><use href="#i-check"/></svg>Só para Android, no mesmo Wi-Fi do PC</li></ul>
+          </div>
+        </div>
+        <div class="visual"><div class="shot-frame"><img src="assets/pacotes/celular.png" alt="Janela de Arquivos do Celular mostrando as pastas de um Android conectado" loading="lazy"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <div class="final-card stars reveal">
+        <div class="notch-static"><div class="eyes"><div class="eye"></div><div class="eye"></div></div></div>
+        <h2 class="display">Quer tudo? Leve o Hawk Completo</h2>
+        <p>O Hawk e os dois pacotes por R$ 29,90, pagamento único. Separado, sairia R$ 30,79.</p>
+        <div class="cta">
+          <button class="btn btn-light buy" data-item="hawk-completo">Comprar o Hawk Completo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <p class="tagline">O notch que faltava no seu Windows</p>
+        <a class="brand" href="index.html"><img src="assets/hawk-icone.svg" alt="">Hawk</a>
+      </div>
+      <div>
+        <h4>Produto</h4>
+        <ul><li><a href="index.html#recursos">Recursos</a></li><li><a href="index.html#olhos">Olhos</a></li><li><a href="index.html#precos">Preços</a></li><li><a href="https://github.com/Persith/hawk-releases/releases/latest/download/Hawk-Setup.exe">Baixar</a></li></ul>
+      </div>
+      <div>
+        <h4>Ajuda</h4>
+        <ul><li><a href="index.html#duvidas">Dúvidas</a></li><li><a href="mailto:assistentehawk@gmail.com">Fale com a gente</a></li><li><a href="termos.html#reembolso">Reembolso</a></li></ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul><li><a href="termos.html">Termos de uso</a></li><li><a href="termos.html#privacidade">Privacidade</a></li></ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 Hawk</span>
+      <a href="mailto:assistentehawk@gmail.com">assistentehawk@gmail.com</a>
+    </div>
+  </div>
+</footer>
+
+<dialog class="buy-dlg" id="buyDlg" aria-label="Comprar"><div class="buy-box"></div></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="loja.js"></script>
+<script>
+(function () {
+  // sections fade in once when they reach the screen
+  var items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    items.forEach(function (el) { io.observe(el); });
+  } else { items.forEach(function (el) { el.classList.add('in'); }); }
+})();
+</script>
+</body>
+</html>

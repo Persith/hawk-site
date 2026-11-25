@@ -1,0 +1,828 @@
+/* Hawk · tema "Cyberpunk / HUD Tático" (cyber). Tudo em unidades do viewBox (-50..50) ou proporcional a --eh.
+   No SVG, "px" num transform vale uma unidade do viewBox (1px = 1% do olho), então o desenho acompanha o notch. */
+
+/* ---------- the box: round, inside ~40% of the notch even when it is tall and narrow */
+.app-eye[data-eyes="cyber"] .eye {
+  --ew: min(var(--eh), calc(var(--nw, 168px) * 0.2 - var(--eh) * 0.575));
+  --cy-d: min(var(--ew), var(--eh));
+  --c: var(--user-eye, #2ef2ff);
+}
+/* the palette by state (the alert colours are the Hawk's, fixed) */
+.app-eye[data-eyes="cyber"] .eye[data-r="working"]   { --c: #ff2bd6; }
+.app-eye[data-eyes="cyber"] .eye[data-r="attention"] { --c: #ffb020; }
+.app-eye[data-eyes="cyber"] .eye[data-r="done"]      { --c: #4b9bff; }
+.app-eye[data-eyes="cyber"] .eye[data-r="seen"]      { --c: #34c759; }
+.app-eye[data-eyes="cyber"] .eye[data-r="whatsapp"]  { --c: #25d366; }
+.app-eye[data-eyes="cyber"] .eye[data-r="timer"]     { --c: #ffc53d; }
+.app-eye[data-eyes="cyber"] .eye[data-r="battery"]   { --c: #ff3b30; }
+.app-eye[data-eyes="cyber"] .eye[data-r="picking"]   { --c: var(--pick); }
+.app-eye[data-eyes="cyber"] .eye[data-r="scared"]    { --c: #e6fbff; }
+
+.app-eye[data-eyes="cyber"] .cy-eye {
+  position: absolute; width: var(--cy-d); height: var(--cy-d);
+  left: calc(50% - var(--cy-d) / 2); top: calc(50% - var(--cy-d) / 2);
+  animation: cyber-blink 5.5s infinite;
+}
+/* the dark screen with scanlines (it stays dark on the light panel too: it is a HUD display) */
+.app-eye[data-eyes="cyber"] .cy-screen {
+  position: absolute; inset: 5%; border-radius: 50%; overflow: hidden;
+  background:
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--c) 17%, transparent) 0 4.5%, transparent 4.5% 12.5%),
+    radial-gradient(circle, color-mix(in srgb, var(--c) 14%, #08101a) 0 30%, #04070b 72%);
+}
+.app-eye[data-eyes="cyber"] .cy-screen::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 34%;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--c) 32%, transparent), transparent);
+  translate: 0 -100%; animation: cyber-scan 3.4s linear infinite;
+}
+.app-eye[data-eyes="cyber"] .eye.light .cy-screen { box-shadow: 0 0 0 calc(var(--eh) * 0.05) rgba(10, 16, 26, 0.55); }
+
+/* ---------- the drawing */
+.app-eye[data-eyes="cyber"] :is(.cy-art, .cy-slice) { position: absolute; inset: 0; }
+.app-eye[data-eyes="cyber"] .cy-eye svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.app-eye[data-eyes="cyber"] :where(.cy-eye svg *) { fill: none; stroke: var(--c); transition: stroke 0.3s, fill 0.3s; }
+.app-eye[data-eyes="cyber"] .cy-ring1 { stroke-width: 5; stroke-dasharray: 56.4 13.5; stroke-dashoffset: 63.15; }
+.app-eye[data-eyes="cyber"] .cy-ticks { stroke-width: 5; }
+.app-eye[data-eyes="cyber"] .cy-ring2 { stroke-width: 4.5; stroke-dasharray: 3.4 4.2; opacity: 0.8; }
+.app-eye[data-eyes="cyber"] .cy-ring3 { stroke-width: 5.5; stroke-dasharray: 46 23.1; stroke-dashoffset: 11.5; }
+.app-eye[data-eyes="cyber"] .cy-dot { fill: var(--user-glint, var(--c)); stroke: none; }
+.app-eye[data-eyes="cyber"] .eye:not([data-r="idle"]) .cy-dot { fill: var(--c); }
+.app-eye[data-eyes="cyber"] .cy-arc { stroke-width: 11; opacity: 0; transition: opacity 0.35s 0.15s, stroke 0.3s; }
+.app-eye[data-eyes="cyber"] .cy-check { stroke-width: 11; stroke-linejoin: miter; stroke-dasharray: 82; stroke-dashoffset: 82; opacity: 0; }
+
+/* the mouse: --cy-a (JS) turns the rings in opposite senses; the core and the inner ring slide toward the cursor */
+.app-eye[data-eyes="cyber"] :is(.cy-r1, .cy-r2, .cy-r3, .cy-core) { transition: rotate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), translate 0.18s ease-out, scale 0.35s, opacity 0.3s; }
+.app-eye[data-eyes="cyber"] .cy-r1 { rotate: calc(var(--cy-a, 0) * 1deg); }
+.app-eye[data-eyes="cyber"] .cy-r2 { rotate: calc(var(--cy-a, 0) * -1.6deg); }
+.app-eye[data-eyes="cyber"] .cy-r3 { rotate: calc(var(--cy-a, 0) * 2.2deg); translate: calc(var(--look-x, 0) * 3px) calc(var(--look-y, 0) * 3px); }
+.app-eye[data-eyes="cyber"] .cy-core { translate: calc(var(--look-x, 0) * 11px) calc(var(--look-y, 0) * 11px); }
+.app-eye[data-eyes="cyber"] .cy-spin2 { animation: cyber-spin 16s linear infinite reverse; }
+
+.app-eye[data-eyes="cyber"] .eye.glow .cy-art { filter: drop-shadow(0 0 calc(var(--eh) * 0.09) var(--c)); }
+
+/* ---------- reactions */
+/* working: magenta, the rings run, the core scans side to side */
+.app-eye[data-eyes="cyber"] .eye[data-r="working"] .cy-spin1 { animation: cyber-spin 5s linear infinite; }
+.app-eye[data-eyes="cyber"] .eye[data-r="working"] .cy-spin2 { animation: cyber-spin 2.6s linear infinite reverse; }
+.app-eye[data-eyes="cyber"] .eye[data-r="working"] .cy-spin3 { animation: cyber-spin 3.6s linear infinite; }
+.app-eye[data-eyes="cyber"] .eye[data-r="working"] .cy-core { animation: cyber-look 2.4s ease-in-out infinite; }
+/* attention and the timer / battery alerts: a strong 1 s pulse */
+.app-eye[data-eyes="cyber"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"]) .cy-eye { animation: cyber-pulse 1s ease-in-out infinite; }
+.app-eye[data-eyes="cyber"] .eye[data-r="attention"] .cy-spin1 { animation: cyber-spin 1.6s linear infinite; }
+/* done / seen: the rings close into a happy arc (and, on the "done" event, a check mark first) */
+.app-eye[data-eyes="cyber"] .eye:is([data-r="done"], [data-r="seen"]) :is(.cy-r1, .cy-r2, .cy-r3) { scale: 0.35; opacity: 0; }
+.app-eye[data-eyes="cyber"] .eye:is([data-r="done"], [data-r="seen"]) .cy-core { scale: 0; opacity: 0; }
+.app-eye[data-eyes="cyber"] .eye:is([data-r="done"], [data-r="seen"]) .cy-arc { opacity: 1; }
+.app-eye[data-eyes="cyber"] .eye:is([data-r="done"], [data-r="seen"]) .cy-eye { animation: cyber-blink 7s infinite; }
+.app-eye[data-eyes="cyber"] .eye.cy-ok .cy-arc { opacity: 0; transition: none; }
+.app-eye[data-eyes="cyber"] .eye.cy-ok .cy-check { animation: cyber-check 1.7s ease-out both; }
+/* WhatsApp: green, the right eye winks */
+.app-eye[data-eyes="cyber"] .eye[data-r="whatsapp"][data-side="right"] .cy-eye { animation: cyber-wink 2.8s ease-in-out infinite; }
+/* Coletor de Cor: the core grows into a swatch of exactly that colour */
+.app-eye[data-eyes="cyber"] .eye[data-r="picking"] .cy-eye { animation: none; }
+.app-eye[data-eyes="cyber"] .eye[data-r="picking"] .cy-core { scale: 2.25; translate: 0 0; }
+.app-eye[data-eyes="cyber"] .eye[data-r="picking"] .cy-dot { stroke: rgba(255, 255, 255, 0.5); stroke-width: 1.4; }
+.app-eye[data-eyes="cyber"] .eye[data-r="picking"] .cy-r2 { opacity: 0.25; }
+/* dragged: fear. The rings spin fast and shake, the core shrinks and darts around */
+.app-eye[data-eyes="cyber"] .eye[data-r="scared"] .cy-eye { animation: cyber-shake 0.12s linear infinite alternate; }
+.app-eye[data-eyes="cyber"] .eye[data-r="scared"] .cy-spin1 { animation: cyber-spin 0.7s linear infinite; }
+.app-eye[data-eyes="cyber"] .eye[data-r="scared"] .cy-spin2 { animation: cyber-spin 0.45s linear infinite reverse; }
+.app-eye[data-eyes="cyber"] .eye[data-r="scared"] .cy-spin3 { animation: cyber-spin 0.6s linear infinite; }
+.app-eye[data-eyes="cyber"] .eye[data-r="scared"] .cy-core { scale: 0.6; animation: cyber-dart 0.9s ease-in-out infinite; }
+
+/* notify: a fast horizontal glitch. Two copies of the drawing show shifted slices; the drawing splits in RGB */
+.app-eye[data-eyes="cyber"] .cy-slice { display: none; }
+.app-eye[data-eyes="cyber"] .eye.cy-glitch .cy-slice { display: block; }
+.app-eye[data-eyes="cyber"] .eye.cy-glitch .cy-s1 { animation: cyber-slice1 0.25s steps(1) both; }
+.app-eye[data-eyes="cyber"] .eye.cy-glitch .cy-s2 { animation: cyber-slice2 0.25s steps(1) both; }
+.app-eye[data-eyes="cyber"] .eye.cy-glitch .cy-art { animation: cyber-rgb 0.25s steps(1) both; }
+
+/* hidden (panel open / water reminder): everything stops, transitions too */
+.app-eye[data-eyes="cyber"] .eye.hold *,
+.app-eye[data-eyes="cyber"] .eye.hold *::before,
+.app-eye[data-eyes="cyber"] .eye.hold *::after { animation-play-state: paused !important; transition: none !important; }
+.app-eye[data-eyes="cyber"] .eye.hold { transition: none !important; }
+
+@keyframes cyber-blink { 0%, 92%, 100% { scale: 1 1; } 95% { scale: 1 0.08; } }
+@keyframes cyber-wink { 0%, 62%, 82%, 100% { scale: 1 1; } 70%, 74% { scale: 1 0.1; } }
+@keyframes cyber-pulse { 0%, 100% { opacity: 1; scale: 1; } 50% { opacity: 0.35; scale: 0.9; } }
+@keyframes cyber-scan { from { translate: 0 -100%; } to { translate: 0 300%; } }
+@keyframes cyber-spin { to { rotate: 360deg; } }
+@keyframes cyber-look { 0%, 100% { translate: -12px 0; } 50% { translate: 12px 0; } }
+@keyframes cyber-shake { from { translate: -2.5% 1.5%; } to { translate: 2.5% -1.5%; } }
+@keyframes cyber-dart { 0%, 100% { translate: 0 0; } 30% { translate: -17px 5px; } 65% { translate: 17px 5px; } }
+@keyframes cyber-check {
+  0% { opacity: 1; stroke-dashoffset: 82; }
+  22% { opacity: 1; stroke-dashoffset: 0; }
+  80% { opacity: 1; stroke-dashoffset: 0; }
+  100% { opacity: 0; stroke-dashoffset: 0; }
+}
+@keyframes cyber-slice1 {
+  0% { clip-path: inset(16% 0 58% 0); translate: 24% 0; }
+  25% { clip-path: inset(34% 0 44% 0); translate: -15% 0; }
+  50% { clip-path: inset(6% 0 76% 0); translate: 11% 0; }
+  75% { clip-path: inset(48% 0 34% 0); translate: -7% 0; }
+  100% { clip-path: inset(50% 0 50% 0); translate: 0 0; }
+}
+@keyframes cyber-slice2 {
+  0% { clip-path: inset(60% 0 18% 0); translate: -20% 0; }
+  25% { clip-path: inset(72% 0 8% 0); translate: 13% 0; }
+  50% { clip-path: inset(52% 0 30% 0); translate: -9% 0; }
+  75% { clip-path: inset(80% 0 4% 0); translate: 5% 0; }
+  100% { clip-path: inset(50% 0 50% 0); translate: 0 0; }
+}
+@keyframes cyber-rgb {
+  0% { translate: -5% 0; filter: drop-shadow(calc(var(--eh) * 0.12) 0 #ff2bd6) drop-shadow(calc(var(--eh) * -0.12) 0 #2ef2ff); }
+  50% { translate: 4% 0; filter: drop-shadow(calc(var(--eh) * -0.09) 0 #ff2bd6) drop-shadow(calc(var(--eh) * 0.09) 0 #2ef2ff); }
+  100% { translate: 0 0; filter: none; }
+}
+
+/* reduced motion: no continuous animation (spin, scan, blink, pulse, shake); the colours and shapes stay */
+@media (prefers-reduced-motion: reduce) {
+  .app-eye[data-eyes="cyber"] .eye *,
+  .app-eye[data-eyes="cyber"] .eye *::before,
+  .app-eye[data-eyes="cyber"] .eye *::after { animation: none !important; }
+  .app-eye[data-eyes="cyber"] .eye[data-r="scared"] .cy-core { scale: 0.6; }
+}
+/* Hawk · tema "Matriz de LED (8-bit)" (led). A grade 7×7 ocupa um quadrado de --eh; cada LED é um ponto redondo. */
+
+.app-eye[data-eyes="led"] .eye {
+  --ew: min(var(--eh), calc(var(--nw, 168px) * 0.2 - var(--eh) * 0.575));
+  --led-d: min(var(--ew), var(--eh));
+  --c: var(--user-eye, #5fdcff);   /* idle: a cool robot blue */
+}
+.app-eye[data-eyes="led"] .eye[data-r="working"]   { --c: #ff8a3d; }
+.app-eye[data-eyes="led"] .eye[data-r="attention"] { --c: #ffb020; }
+.app-eye[data-eyes="led"] .eye[data-r="done"]      { --c: #4b9bff; }
+.app-eye[data-eyes="led"] .eye[data-r="seen"]      { --c: #34c759; }
+.app-eye[data-eyes="led"] .eye[data-r="whatsapp"]  { --c: #25d366; }
+.app-eye[data-eyes="led"] .eye[data-r="timer"]     { --c: #ffc53d; }
+.app-eye[data-eyes="led"] .eye[data-r="battery"]   { --c: #ff3b30; }
+.app-eye[data-eyes="led"] .eye[data-r="picking"]   { --c: var(--pick); }
+.app-eye[data-eyes="led"] .eye[data-r="scared"]    { --c: #f2f8ff; }
+.app-eye[data-eyes="led"] .eye.light[data-r="idle"] { --c: var(--user-eye, #0b86c4); }
+.app-eye[data-eyes="led"] .eye.light[data-r="scared"] { --c: #33404f; }
+
+.app-eye[data-eyes="led"] .led-grid {
+  position: absolute; width: var(--led-d); height: var(--led-d);
+  left: calc(50% - var(--led-d) / 2); top: calc(50% - var(--led-d) / 2);
+  display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr);
+}
+/* a LED: off keeps a faint residual glow, dim is the eye's body, on is the pupil / the icon */
+.app-eye[data-eyes="led"] .led-grid i {
+  margin: 11%; border-radius: 50%;
+  background: color-mix(in srgb, var(--c) 13%, transparent);
+  transition: background-color 0.06s;
+  animation: led-blink 5.5s infinite;
+  animation-delay: calc(var(--row) * 32ms);
+}
+.app-eye[data-eyes="led"] .led-grid i.dim { background: color-mix(in srgb, var(--c) 40%, transparent); }
+.app-eye[data-eyes="led"] .led-grid i.on { background: var(--c); }
+.app-eye[data-eyes="led"] .eye.light .led-grid i { background: rgba(20, 30, 45, 0.08); }
+.app-eye[data-eyes="led"] .eye.light .led-grid i.dim { background: color-mix(in srgb, var(--c) 42%, transparent); }
+.app-eye[data-eyes="led"] .eye.light .led-grid i.on { background: var(--c); }
+.app-eye[data-eyes="led"] .eye.glow .led-grid { filter: drop-shadow(0 0 calc(var(--eh) * 0.07) color-mix(in srgb, var(--c) 80%, transparent)); }
+/* Coletor de Cor: every LED of the disc in exactly that colour, no glow tint around */
+.app-eye[data-eyes="led"] .eye[data-r="picking"] .led-grid { filter: none; }
+
+/* ---------- reactions (the JS draws the pattern; the CSS gives colour and motion) */
+/* the blink: the rows go out one by one from the top (the delay grows with --row) */
+.app-eye[data-eyes="led"] .eye:not([data-r="idle"]):not([data-r="working"]) .led-grid i { animation: none; }
+.app-eye[data-eyes="led"] .eye[data-r="whatsapp"][data-side="right"] .led-grid i { animation: led-wink 2.8s infinite; animation-delay: calc(var(--row) * 32ms); }
+.app-eye[data-eyes="led"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"]) .led-grid { animation: led-pulse 1s ease-in-out infinite; }
+.app-eye[data-eyes="led"] .eye[data-r="scared"] .led-grid { animation: led-shake 0.12s linear infinite alternate; }
+
+.app-eye[data-eyes="led"] .eye.hold *,
+.app-eye[data-eyes="led"] .eye.hold *::before,
+.app-eye[data-eyes="led"] .eye.hold *::after { animation-play-state: paused !important; transition: none !important; }
+.app-eye[data-eyes="led"] .eye.hold { transition: none !important; }
+
+@keyframes led-blink { 0%, 92%, 97%, 100% { opacity: 1; } 93.5%, 95.5% { opacity: 0; } }
+@keyframes led-wink { 0%, 62%, 76%, 100% { opacity: 1; } 65%, 72% { opacity: 0; } }
+@keyframes led-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes led-shake { from { translate: -3% 2%; } to { translate: 3% -2%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-eye[data-eyes="led"] .eye *,
+  .app-eye[data-eyes="led"] .eye *::before,
+  .app-eye[data-eyes="led"] .eye *::after { animation: none !important; }
+}
+/* Hawk · tema "Espectro de Áudio (Equalizer)" (equalizer). 4 barras de altura --eh, encolhidas por escala Y
+   (só transform). Largura do olho: 0,8 × --eh. */
+
+.app-eye[data-eyes="equalizer"] .eye {
+  --ew: min(calc(var(--eh) * 0.8), calc(var(--nw, 168px) * 0.2 - var(--eh) * 0.575));
+  --eq-mute: 1;
+  /* idle: a cool spectrum across the 4 bars (or shaded from user color) */
+  --b0: color-mix(in srgb, var(--user-eye, #5fe3ff) 85%, #ffffff);
+  --b1: var(--user-eye, #79c3ff);
+  --b2: color-mix(in srgb, var(--user-eye, #98a6ff) 86%, #6a4fd8);
+  --b3: color-mix(in srgb, var(--user-eye, #b58cff) 74%, #4e22b0);
+}
+.app-eye[data-eyes="equalizer"] .eye.light {
+  --b0: color-mix(in srgb, var(--user-eye, #0b93c4) 88%, #ffffff);
+  --b1: var(--user-eye, #2f78d8);
+  --b2: color-mix(in srgb, var(--user-eye, #5560d8) 84%, #2c1a78);
+  --b3: color-mix(in srgb, var(--user-eye, #7a45d0) 72%, #1d0e54);
+}
+.app-eye[data-eyes="equalizer"] .eye[data-r="working"]   { --b0: #ff8a3d; --b1: #ff8a3d; --b2: #ff8a3d; --b3: #ff8a3d; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="attention"] { --b0: #ffb020; --b1: #ffb020; --b2: #ffb020; --b3: #ffb020; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="done"]      { --b0: #4b9bff; --b1: #4b9bff; --b2: #4b9bff; --b3: #4b9bff; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="seen"]      { --b0: #34c759; --b1: #34c759; --b2: #34c759; --b3: #34c759; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="whatsapp"]  { --b0: #25d366; --b1: #25d366; --b2: #25d366; --b3: #25d366; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="timer"]     { --b0: #ffc53d; --b1: #ffc53d; --b2: #ffc53d; --b3: #ffc53d; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="battery"]   { --b0: #ff3b30; --b1: #ff3b30; --b2: #ff3b30; --b3: #ff3b30; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="picking"]   { --b0: var(--pick); --b1: var(--pick); --b2: var(--pick); --b3: var(--pick); }
+.app-eye[data-eyes="equalizer"] .eye[data-r="scared"]    { --b0: #eef4ff; --b1: #eef4ff; --b2: #eef4ff; --b3: #eef4ff; }
+.app-eye[data-eyes="equalizer"] .eye.light[data-r="scared"] { --b0: #4a5566; --b1: #4a5566; --b2: #4a5566; --b3: #4a5566; }
+/* microphone muted: low and greyish (only over the calm states: an alert keeps its colour) */
+.app-eye[data-eyes="equalizer"] .eye.muted { --eq-mute: 0.42; }
+
+.app-eye[data-eyes="equalizer"] .eq-eye { position: absolute; inset: 0; animation: equalizer-blink 5.5s infinite; }
+.app-eye[data-eyes="equalizer"] .eq-bars {
+  position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; gap: calc(var(--eh) * 0.085);
+  translate: 0 calc(var(--look-y, 0) * var(--eh) * 0.1); transition: translate 0.2s ease-out;
+}
+.app-eye[data-eyes="equalizer"] .eye.glow .eq-bars { filter: drop-shadow(0 0 calc(var(--eh) * 0.08) color-mix(in srgb, var(--b1) 70%, transparent)); }
+.app-eye[data-eyes="equalizer"] .eq-bars i {
+  flex: none; width: calc(var(--eh) * 0.13); height: var(--eh); border-radius: 99px;
+  background: var(--k);
+  scale: 1 calc(var(--h) * var(--eq-mute));
+  rotate: calc(var(--look-x, 0) * 14deg);
+  transition: scale 0.12s ease-out, rotate 0.2s ease-out, translate 0.3s ease-out, background-color 0.3s;
+}
+.app-eye[data-eyes="equalizer"] .eq-bars i:nth-child(1) { --k: var(--b0); --h: var(--h0, 0.44); }
+.app-eye[data-eyes="equalizer"] .eq-bars i:nth-child(2) { --k: var(--b1); --h: var(--h1, 0.78); }
+.app-eye[data-eyes="equalizer"] .eq-bars i:nth-child(3) { --k: var(--b2); --h: var(--h2, 0.78); }
+.app-eye[data-eyes="equalizer"] .eq-bars i:nth-child(4) { --k: var(--b3); --h: var(--h3, 0.44); }
+.app-eye[data-eyes="equalizer"] .eye.muted .eq-bars i { background: color-mix(in srgb, var(--k) 35%, #8b919c); }
+.app-eye[data-eyes="equalizer"] .eye.light.muted .eq-bars i { background: color-mix(in srgb, var(--k) 35%, #6b717c); }
+.app-eye[data-eyes="equalizer"] .eye.audio .eq-bars i { transition: scale 0.09s linear, rotate 0.2s ease-out, background-color 0.3s; }
+
+/* music without a measured level: each bar dances in its own rhythm (like the Hawk's own bars) */
+.app-eye[data-eyes="equalizer"] .eye.beat .eq-bars i { animation: equalizer-dance 0.8s ease-in-out infinite; }
+.app-eye[data-eyes="equalizer"] .eye.beat .eq-bars i:nth-child(2) { animation-delay: -0.6s; animation-duration: 0.7s; }
+.app-eye[data-eyes="equalizer"] .eye.beat .eq-bars i:nth-child(3) { animation-delay: -0.4s; animation-duration: 0.9s; }
+.app-eye[data-eyes="equalizer"] .eye.beat .eq-bars i:nth-child(4) { animation-delay: -0.7s; animation-duration: 0.75s; }
+
+/* ---------- reactions */
+/* working: a wave runs across the bars (busy) */
+.app-eye[data-eyes="equalizer"] .eye[data-r="working"]:not(.beat):not(.audio) .eq-bars i { animation: equalizer-wave 1.2s ease-in-out infinite; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="working"]:not(.beat):not(.audio) .eq-bars i:nth-child(2) { animation-delay: 0.15s; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="working"]:not(.beat):not(.audio) .eq-bars i:nth-child(3) { animation-delay: 0.3s; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="working"]:not(.beat):not(.audio) .eq-bars i:nth-child(4) { animation-delay: 0.45s; }
+/* attention / timer / battery: all bars at the top, blinking */
+.app-eye[data-eyes="equalizer"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"]) .eq-bars i { --h: 1; animation: none; }
+.app-eye[data-eyes="equalizer"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"]) .eq-eye { animation: equalizer-pulse 1s ease-in-out infinite; }
+/* done / seen: the bars line up into a happy arc ( ^ ) */
+.app-eye[data-eyes="equalizer"] .eye:is([data-r="done"], [data-r="seen"]) .eq-bars i { --h: 0.34; animation: none; }
+.app-eye[data-eyes="equalizer"] .eye:is([data-r="done"], [data-r="seen"]) .eq-bars i:nth-child(1) { translate: 0 calc(var(--eh) * 0.12); rotate: -42deg; }
+.app-eye[data-eyes="equalizer"] .eye:is([data-r="done"], [data-r="seen"]) .eq-bars i:nth-child(2) { translate: 0 calc(var(--eh) * -0.12); rotate: -14deg; }
+.app-eye[data-eyes="equalizer"] .eye:is([data-r="done"], [data-r="seen"]) .eq-bars i:nth-child(3) { translate: 0 calc(var(--eh) * -0.12); rotate: 14deg; }
+.app-eye[data-eyes="equalizer"] .eye:is([data-r="done"], [data-r="seen"]) .eq-bars i:nth-child(4) { translate: 0 calc(var(--eh) * 0.12); rotate: 42deg; }
+.app-eye[data-eyes="equalizer"] .eye:is([data-r="done"], [data-r="seen"]) .eq-eye { animation: none; }
+/* WhatsApp: the right eye winks */
+.app-eye[data-eyes="equalizer"] .eye[data-r="whatsapp"] .eq-eye { animation: none; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="whatsapp"][data-side="right"] .eq-eye { animation: equalizer-wink 2.8s ease-in-out infinite; }
+/* Coletor de Cor: wider bars, full, in exactly that colour */
+.app-eye[data-eyes="equalizer"] .eye[data-r="picking"] .eq-bars i { width: calc(var(--eh) * 0.17); --h: 0.9; animation: none; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="picking"] .eq-eye { animation: none; }
+/* dragged: fear. The bars jump to random heights, trembling */
+.app-eye[data-eyes="equalizer"] .eye[data-r="scared"] .eq-bars i { animation: equalizer-jump 0.36s steps(1) infinite; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="scared"] .eq-bars i:nth-child(2) { animation-duration: 0.29s; animation-delay: -0.1s; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="scared"] .eq-bars i:nth-child(3) { animation-duration: 0.41s; animation-delay: -0.2s; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="scared"] .eq-bars i:nth-child(4) { animation-duration: 0.33s; animation-delay: -0.05s; }
+.app-eye[data-eyes="equalizer"] .eye[data-r="scared"] .eq-eye { animation: equalizer-shake 0.12s linear infinite alternate; }
+
+.app-eye[data-eyes="equalizer"] .eye.hold *,
+.app-eye[data-eyes="equalizer"] .eye.hold *::before,
+.app-eye[data-eyes="equalizer"] .eye.hold *::after { animation-play-state: paused !important; transition: none !important; }
+.app-eye[data-eyes="equalizer"] .eye.hold { transition: none !important; }
+
+@keyframes equalizer-blink { 0%, 93%, 100% { scale: 1 1; } 96% { scale: 1 0.1; } }
+@keyframes equalizer-wink { 0%, 62%, 82%, 100% { scale: 1 1; } 70%, 74% { scale: 1 0.1; } }
+@keyframes equalizer-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes equalizer-dance { 0%, 100% { scale: 1 calc(0.26 * var(--eq-mute)); } 50% { scale: 1 calc(1 * var(--eq-mute)); } }
+@keyframes equalizer-wave { 0%, 100% { scale: 1 calc(0.3 * var(--eq-mute)); } 40% { scale: 1 calc(0.95 * var(--eq-mute)); } }
+@keyframes equalizer-jump { 0% { scale: 1 0.3; } 25% { scale: 1 0.95; } 50% { scale: 1 0.5; } 75% { scale: 1 0.78; } }
+@keyframes equalizer-shake { from { translate: -4% 2%; } to { translate: 4% -2%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-eye[data-eyes="equalizer"] .eye *,
+  .app-eye[data-eyes="equalizer"] .eye *::before,
+  .app-eye[data-eyes="equalizer"] .eye *::after { animation: none !important; }
+}
+/* Hawk · tema "HAL 9000 / Lente de Câmera" (hal). Desenho em SVG (viewBox -50..50): "px" num transform do SVG
+   vale 1 unidade do viewBox, então tudo acompanha o tamanho do notch. */
+
+.app-eye[data-eyes="hal"] .eye {
+  --ew: min(var(--eh), calc(var(--nw, 168px) * 0.2 - var(--eh) * 0.575));
+  --hal-d: min(var(--ew), var(--eh));
+  --c: var(--user-eye, #c8170d); /* idle: a deep, calm red (or user color) */
+  --hal-a: 33;             /* the shutter's opening (viewBox units from the centre) */
+  --hal-tw: 0deg;          /* the blades' twist */
+}
+.app-eye[data-eyes="hal"] .eye[data-r="working"]   { --c: #ff8a3d; }
+.app-eye[data-eyes="hal"] .eye[data-r="attention"] { --c: #ffb020; }
+.app-eye[data-eyes="hal"] .eye[data-r="done"]      { --c: #4b9bff; --hal-a: 30; --hal-tw: 8deg; }
+.app-eye[data-eyes="hal"] .eye[data-r="seen"]      { --c: #34c759; --hal-a: 30; --hal-tw: 8deg; }
+.app-eye[data-eyes="hal"] .eye[data-r="whatsapp"]  { --c: #25d366; }
+.app-eye[data-eyes="hal"] .eye[data-r="timer"]     { --c: #ffc53d; }
+.app-eye[data-eyes="hal"] .eye[data-r="battery"]   { --c: #ff3b30; }
+.app-eye[data-eyes="hal"] .eye[data-r="picking"]   { --c: var(--pick); }
+.app-eye[data-eyes="hal"] .eye[data-r="scared"]    { --c: #ffd9cf; --hal-a: 44; --hal-tw: -10deg; }
+/* microphone muted: the diaphragm closes to a pinhole. With something urgent on, it leaves the colour readable */
+.app-eye[data-eyes="hal"] .eye.muted { --hal-a: 8.5; --hal-tw: 26deg; }
+.app-eye[data-eyes="hal"] .eye.muted:is([data-r="attention"], [data-r="whatsapp"], [data-r="timer"], [data-r="battery"]) { --hal-a: 15; }
+.app-eye[data-eyes="hal"] .eye.muted:is([data-r="done"], [data-r="seen"]) { --hal-a: 22; }
+.app-eye[data-eyes="hal"] .eye.muted[data-r="picking"] { --hal-a: 30; --hal-tw: 0deg; }
+.app-eye[data-eyes="hal"] .eye.muted[data-r="scared"] { --hal-a: 44; --hal-tw: -10deg; }
+
+.app-eye[data-eyes="hal"] .hal-eye {
+  position: absolute; width: var(--hal-d); height: var(--hal-d);
+  left: calc(50% - var(--hal-d) / 2); top: calc(50% - var(--hal-d) / 2);
+}
+.app-eye[data-eyes="hal"] .hal-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.app-eye[data-eyes="hal"] .eye.glow .hal-svg { filter: drop-shadow(0 0 calc(var(--eh) * 0.11) color-mix(in srgb, var(--c) 55%, transparent)); }
+
+/* the body of the lens: metal ring, black mount, dark glass lit a little by the core */
+.app-eye[data-eyes="hal"] .hal-bz0 { stop-color: #8a8f98; }
+.app-eye[data-eyes="hal"] .hal-bz1 { stop-color: #33363c; }
+.app-eye[data-eyes="hal"] .hal-bz2 { stop-color: #0c0d0f; }
+.app-eye[data-eyes="hal"] .eye.light .hal-bz0 { stop-color: #ffffff; }
+.app-eye[data-eyes="hal"] .eye.light .hal-bz1 { stop-color: #b9bec6; }
+.app-eye[data-eyes="hal"] .eye.light .hal-bz2 { stop-color: #6f757e; }
+.app-eye[data-eyes="hal"] .hal-mount { fill: #050506; }
+.app-eye[data-eyes="hal"] .hal-gl0 { stop-color: color-mix(in srgb, var(--c) 22%, #0a0606); transition: stop-color 0.4s; }
+.app-eye[data-eyes="hal"] .hal-gl1 { stop-color: #030303; }
+.app-eye[data-eyes="hal"] .hal-rim { fill: none; stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.2; }
+
+/* the core: a glow in the state colour with a white-hot centre */
+.app-eye[data-eyes="hal"] .hal-co0 { stop-color: color-mix(in srgb, var(--c) 45%, #fff); transition: stop-color 0.4s; }
+.app-eye[data-eyes="hal"] .hal-co1 { stop-color: var(--c); transition: stop-color 0.4s; }
+.app-eye[data-eyes="hal"] .hal-co2 { stop-color: var(--c); stop-opacity: 0.45; transition: stop-color 0.4s; }
+.app-eye[data-eyes="hal"] .hal-co3 { stop-color: var(--c); stop-opacity: 0; }
+.app-eye[data-eyes="hal"] .hal-hot { fill: color-mix(in srgb, var(--c) 30%, var(--user-glint, #fff)); transition: fill 0.4s, opacity 0.3s; }
+.app-eye[data-eyes="hal"] .hal-core {
+  translate: calc(var(--look-x, 0) * 7px) calc(var(--look-y, 0) * 7px);
+  transition: translate 0.25s ease-out, scale 0.35s ease-out;
+  animation: hal-breathe 4.2s ease-in-out infinite;
+}
+.app-eye[data-eyes="hal"] .hal-glow { scale: calc(1 + var(--hal-lvl, 0) * 0.22); transition: scale 0.08s linear; }
+.app-eye[data-eyes="hal"] .eye.beat .hal-glow { animation: hal-beat 0.5s ease-out infinite; }
+
+/* the convex glass: a curved shine that slides against the mouse (depth) */
+.app-eye[data-eyes="hal"] .hal-reflex { translate: calc(var(--look-x, 0) * -5px) calc(var(--look-y, 0) * -5px); transition: translate 0.25s ease-out; }
+.app-eye[data-eyes="hal"] .hal-reflex path { fill: none; stroke: color-mix(in srgb, var(--user-glint, #ffffff) 38%, transparent); stroke-width: 4.5; stroke-linecap: round; }
+.app-eye[data-eyes="hal"] .hal-reflex circle { fill: color-mix(in srgb, var(--user-glint, #ffffff) 85%, transparent); }
+
+/* the shutter: 6 blades, each pushed out to --hal-a and twisted by --hal-tw (300 ms, ease-out) */
+.app-eye[data-eyes="hal"] .hal-blade {
+  fill: #191b1f; stroke: rgba(255, 255, 255, 0.16); stroke-width: 1;
+  translate: 0 calc(var(--hal-a) * -1px); rotate: var(--hal-tw);
+  transition: translate 0.3s ease-out, rotate 0.3s ease-out;
+  animation: hal-blink 6.2s ease-in-out infinite;
+}
+.app-eye[data-eyes="hal"] .hal-blades g:nth-child(even) .hal-blade { fill: #212429; }
+.app-eye[data-eyes="hal"] .eye.muted .hal-blade { animation: none; }
+/* the "smile" (done / seen): a lower blade rises under the core, leaving a glowing arc ( ^ ) */
+.app-eye[data-eyes="hal"] .hal-smile { fill: #17191d; stroke: rgba(255, 255, 255, 0.14); stroke-width: 1; translate: 0 34px; transition: translate 0.45s cubic-bezier(0.3, 1.4, 0.5, 1); }
+.app-eye[data-eyes="hal"] .eye:is([data-r="done"], [data-r="seen"]) .hal-smile { translate: 0 0; }
+.app-eye[data-eyes="hal"] .eye:is([data-r="done"], [data-r="seen"]) .hal-core { translate: 0 -9px; scale: 1.2; animation: none; }
+.app-eye[data-eyes="hal"] .eye:is([data-r="done"], [data-r="seen"]) .hal-blade { animation: none; }
+
+/* ---------- reactions */
+.app-eye[data-eyes="hal"] .eye[data-r="idle"] .hal-core { animation-duration: 5s; }
+.app-eye[data-eyes="hal"] .eye[data-r="working"] .hal-core { animation: hal-scan 2.4s ease-in-out infinite; }
+.app-eye[data-eyes="hal"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"]) .hal-core { animation: hal-pulse 1s ease-in-out infinite; }
+.app-eye[data-eyes="hal"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"]) .hal-blade { animation: none; }
+/* WhatsApp: green, the right lens winks with its shutter */
+.app-eye[data-eyes="hal"] .eye[data-r="whatsapp"] .hal-blade { animation: none; }
+.app-eye[data-eyes="hal"] .eye[data-r="whatsapp"][data-side="right"]:not(.muted) .hal-blade { animation: hal-wink 2.8s ease-in-out infinite; }
+/* Coletor de Cor: the core becomes a plain disc of exactly that colour */
+.app-eye[data-eyes="hal"] .eye[data-r="picking"] .hal-core { animation: none; translate: 0 0; }
+.app-eye[data-eyes="hal"] .eye[data-r="picking"] .hal-co0,
+.app-eye[data-eyes="hal"] .eye[data-r="picking"] .hal-co1 { stop-color: var(--pick); }
+.app-eye[data-eyes="hal"] .eye[data-r="picking"] .hal-co2 { stop-color: var(--pick); }
+.app-eye[data-eyes="hal"] .eye[data-r="picking"] .hal-hot { opacity: 0; }
+.app-eye[data-eyes="hal"] .eye[data-r="picking"] .hal-glow { scale: 0.95; }
+.app-eye[data-eyes="hal"] .eye[data-r="picking"] .hal-blade { animation: none; }
+/* dragged: fear. The diaphragm opens all the way and shakes; the core shrinks to a pale dot that looks around */
+.app-eye[data-eyes="hal"] .eye[data-r="scared"] .hal-eye { animation: hal-shake 0.12s linear infinite alternate; }
+.app-eye[data-eyes="hal"] .eye[data-r="scared"] .hal-core { scale: 0.42; animation: hal-dart 0.9s ease-in-out infinite; }
+.app-eye[data-eyes="hal"] .eye[data-r="scared"] .hal-blade { animation: none; }
+
+/* hidden: everything stops, transitions too */
+.app-eye[data-eyes="hal"] .eye.hold *,
+.app-eye[data-eyes="hal"] .eye.hold *::before,
+.app-eye[data-eyes="hal"] .eye.hold *::after { animation-play-state: paused !important; transition: none !important; }
+.app-eye[data-eyes="hal"] .eye.hold { transition: none !important; }
+
+@keyframes hal-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+@keyframes hal-beat { 0% { scale: 1.2; } 60%, 100% { scale: 1; } }
+@keyframes hal-pulse { 0%, 100% { opacity: 1; scale: 1; } 50% { opacity: 0.35; scale: 0.85; } }
+@keyframes hal-scan { 0%, 100% { translate: -8px 0; } 50% { translate: 8px 0; } }
+@keyframes hal-dart { 0%, 100% { translate: 0 0; } 30% { translate: -17px 4px; } 65% { translate: 17px 4px; } }
+@keyframes hal-shake { from { translate: -2.5% 1.5%; } to { translate: 2.5% -1.5%; } }
+@keyframes hal-blink {
+  0%, 93%, 100% { translate: 0 calc(var(--hal-a) * -1px); rotate: var(--hal-tw); }
+  96% { translate: 0 0; rotate: 28deg; }
+}
+@keyframes hal-wink {
+  0%, 62%, 82%, 100% { translate: 0 calc(var(--hal-a) * -1px); rotate: var(--hal-tw); }
+  70%, 74% { translate: 0 0; rotate: 28deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-eye[data-eyes="hal"] .eye *,
+  .app-eye[data-eyes="hal"] .eye *::before,
+  .app-eye[data-eyes="hal"] .eye *::after { animation: none !important; }
+}
+/* Hawk · tema "Minimalista E-Ink" (eink). Traço fino (≈1 px no tamanho real), sem sombra, brilho nem degradê:
+   ignora "Luz em volta". Transições curtas (150 ms) e mudanças "secas", como uma tela de tinta eletrônica. */
+
+.app-eye[data-eyes="eink"] .eye {
+  --ew: min(var(--eh), calc(var(--nw, 168px) * 0.2 - var(--eh) * 0.575));
+  --ei-d: min(var(--ew), var(--eh));
+  --ink: var(--user-eye, #ffffff);
+  --ei-y: -6;        /* the lid: height (viewBox units, 0 = middle of the eye) */
+  --ei-rot: 0;       /* and tilt in degrees, positive = the inner end goes down */
+  --ei-k: 1;         /* the right eye mirrors the tilt */
+}
+.app-eye[data-eyes="eink"] .eye[data-side="right"] { --ei-k: -1; }
+.app-eye[data-eyes="eink"] .eye.light { --ink: var(--user-eye, #000000); }
+/* the mood is in the lid */
+.app-eye[data-eyes="eink"] .eye[data-r="working"]   { --ei-y: 6; --ei-rot: 6; }      /* low and straight: focus */
+.app-eye[data-eyes="eink"] .eye[data-r="attention"] { --ei-y: -47; --ei-rot: -4; }   /* all open: the lid becomes a raised brow */
+.app-eye[data-eyes="eink"] .eye[data-r="scared"]    { --ei-y: -49; --ei-rot: -14; }  /* wide open, worried brows */
+.app-eye[data-eyes="eink"] .eye[data-r="picking"]   { --ei-y: -47; }
+.app-eye[data-eyes="eink"] .eye:is([data-r="timer"], [data-r="battery"]) { --ei-y: -47; }
+/* the alerts: only the stroke takes the colour (no fill, no glow) */
+.app-eye[data-eyes="eink"] .eye[data-r="whatsapp"] { --ink: #25d366; }
+.app-eye[data-eyes="eink"] .eye[data-r="timer"]    { --ink: #ffc53d; }
+.app-eye[data-eyes="eink"] .eye[data-r="battery"]  { --ink: #ff3b30; }
+
+.app-eye[data-eyes="eink"] .ei-svg {
+  position: absolute; width: var(--ei-d); height: var(--ei-d);
+  left: calc(50% - var(--ei-d) / 2); top: calc(50% - var(--ei-d) / 2); overflow: visible;
+}
+.app-eye[data-eyes="eink"] .ei-outline,
+.app-eye[data-eyes="eink"] .ei-lid,
+.app-eye[data-eyes="eink"] .ei-arc { fill: none; stroke: var(--ink); stroke-width: 6; stroke-linecap: round; transition: stroke 0.15s, opacity 0.15s; }
+.app-eye[data-eyes="eink"] .ei-fill { fill: var(--pick); opacity: 0; }
+.app-eye[data-eyes="eink"] .ei-pupil {
+  fill: var(--ink);
+  translate: calc(var(--look-x, 0) * 15px) calc(var(--look-y, 0) * 13px);
+  transition: translate 0.15s ease-out, fill 0.15s, scale 0.15s;
+}
+/* the lid line and the clip under it move together */
+.app-eye[data-eyes="eink"] :is(.ei-lid, .ei-cut) {
+  translate: 0 calc(var(--ei-y) * 1px); rotate: calc(var(--ei-rot) * var(--ei-k) * 1deg);
+  transition: translate 0.15s ease-out, rotate 0.15s ease-out;
+  animation: eink-blink 5.5s infinite;
+}
+.app-eye[data-eyes="eink"] .ei-arc { opacity: 0; }
+
+/* done / seen: a happy arc instead of the eye */
+.app-eye[data-eyes="eink"] .eye:is([data-r="done"], [data-r="seen"]) :is(.ei-outline, .ei-pupil, .ei-lid) { opacity: 0; }
+.app-eye[data-eyes="eink"] .eye:is([data-r="done"], [data-r="seen"]) :is(.ei-lid, .ei-cut) { animation: none; }
+.app-eye[data-eyes="eink"] .eye:is([data-r="done"], [data-r="seen"]) .ei-arc { opacity: 1; }
+.app-eye[data-eyes="eink"] .eye[data-r="seen"] .ei-arc { stroke-width: 4.5; translate: 0 6px; scale: 0.9; }
+/* attention: wide open, a dry on/off "refresh" every second */
+.app-eye[data-eyes="eink"] .eye[data-r="attention"] .ei-svg,
+.app-eye[data-eyes="eink"] .eye:is([data-r="timer"], [data-r="battery"]) .ei-svg { animation: eink-flash 1s step-end infinite; }
+.app-eye[data-eyes="eink"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"], [data-r="picking"], [data-r="scared"]) :is(.ei-lid, .ei-cut) { animation: none; }
+/* WhatsApp: the right eye winks (the lid drops for a moment) */
+.app-eye[data-eyes="eink"] .eye[data-r="whatsapp"] :is(.ei-lid, .ei-cut) { animation: none; }
+.app-eye[data-eyes="eink"] .eye[data-r="whatsapp"][data-side="right"] :is(.ei-lid, .ei-cut) { animation: eink-wink 2.8s infinite; }
+/* Coletor de Cor: the eye is filled with exactly that colour (the only fill this theme ever uses) */
+.app-eye[data-eyes="eink"] .eye[data-r="picking"] .ei-fill { opacity: 1; }
+.app-eye[data-eyes="eink"] .eye[data-r="picking"] .ei-pupil { opacity: 0; }
+/* dragged: wide open, a small pupil that jumps from side to side (no smooth motion on e-ink) */
+.app-eye[data-eyes="eink"] .eye[data-r="scared"] .ei-pupil { scale: 0.55; animation: eink-dart 0.9s step-end infinite; }
+
+.app-eye[data-eyes="eink"] .eye.hold *,
+.app-eye[data-eyes="eink"] .eye.hold *::before,
+.app-eye[data-eyes="eink"] .eye.hold *::after { animation-play-state: paused !important; transition: none !important; }
+.app-eye[data-eyes="eink"] .eye.hold { transition: none !important; }
+
+/* the blink: the lid snaps shut and open (e-ink has no in-between) */
+@keyframes eink-blink {
+  0%, 94%, 100% { translate: 0 calc(var(--ei-y) * 1px); }
+  95.5%, 97% { translate: 0 44px; }
+}
+@keyframes eink-wink {
+  0%, 66%, 76%, 100% { translate: 0 calc(var(--ei-y) * 1px); }
+  68%, 74% { translate: 0 44px; }
+}
+@keyframes eink-flash { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes eink-dart { 0% { translate: 0 0; } 25% { translate: -20px 0; } 50% { translate: 0 0; } 75% { translate: 20px 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-eye[data-eyes="eink"] .eye *,
+  .app-eye[data-eyes="eink"] .eye *::before,
+  .app-eye[data-eyes="eink"] .eye *::after { animation: none !important; }
+}
+/* Hawk · tema "Gato / Felino Noturno" (gato). SVG com viewBox -60..60 × -50..50 (olho amendoado, 1,2 : 1). */
+
+.app-eye[data-eyes="gato"] .eye {
+  --ew: min(calc(var(--eh) * 1.44), calc(var(--nw, 168px) * 0.28 - var(--eh) * 0.35));
+  /* the iris: bright emerald matching the cat art (or user eye color) */
+  --iris: var(--user-eye, #2bd67b);
+  --g0: color-mix(in srgb, var(--iris) 72%, #a8ffcf);
+  --g1: var(--iris);
+  --g2: color-mix(in srgb, var(--iris) 65%, #072916);
+  --c: var(--iris);
+  --gt-lid: -106%;  /* retracted above eye cutout */
+}
+.app-eye[data-eyes="gato"] .eye[data-r="working"]   { --c: var(--user-eye, #ffc23a); --g0: color-mix(in srgb, var(--c) 72%, #fff3b0); --g1: var(--c); --g2: color-mix(in srgb, var(--c) 65%, #5c3202); }
+.app-eye[data-eyes="gato"] .eye[data-r="attention"] { --c: #ffb020; --g0: #ffe3a3; --g1: #ffb020; --g2: #a86400; }
+.app-eye[data-eyes="gato"] .eye[data-r="done"]      { --c: #4b9bff; --g0: #cfe3ff; --g1: #4b9bff; --g2: #1d4f9e; --gt-lid: -48%; }
+.app-eye[data-eyes="gato"] .eye[data-r="seen"]      { --c: #34c759; --g0: #c9f5d4; --g1: #34c759; --g2: #17702f; --gt-lid: -62%; }
+.app-eye[data-eyes="gato"] .eye[data-r="whatsapp"]  { --c: var(--user-eye, #25d366); --g0: color-mix(in srgb, var(--c) 72%, #c6f7da); --g1: var(--c); --g2: color-mix(in srgb, var(--c) 65%, #0f4f28); }
+.app-eye[data-eyes="gato"] .eye[data-r="timer"]     { --c: #ffc53d; --g0: #fff0c2; --g1: #ffc53d; --g2: #b37f00; }
+.app-eye[data-eyes="gato"] .eye[data-r="battery"]   { --c: #ff3b30; --g0: #ffc4bf; --g1: #ff3b30; --g2: #9e1710; }
+.app-eye[data-eyes="gato"] .eye[data-r="picking"]   { --c: var(--pick); --g0: var(--pick); --g1: var(--pick); --g2: var(--pick); }
+.app-eye[data-eyes="gato"] .eye[data-r="scared"]    { --gt-lid: -106%; }
+
+/* iris gradient sits on .gt-eye directly so 100% of gato.png's eye cutout fills edge-to-edge with zero gaps */
+.app-eye[data-eyes="gato"] .gt-eye {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(64% 64% at 48% 45%, var(--g0) 0%, var(--g1) 52%, var(--g2) 100%);
+}
+.app-eye[data-eyes="gato"] .gt-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.app-eye[data-eyes="gato"] .eye.glow .gt-svg { filter: drop-shadow(0 0 calc(var(--eh) * 0.1) color-mix(in srgb, var(--c) 60%, transparent)); }
+.app-eye[data-eyes="gato"] .gt-glint { fill: color-mix(in srgb, var(--user-glint, #ffffff) 90%, transparent); }
+
+/* dark fur eyelid fills 100% of .gt-eye cleanly on blink/wink so zero background ever shows */
+.app-eye[data-eyes="gato"] .gt-eye::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #0a0e0d;
+  border-bottom: 2.5px solid #1b2220;
+  translate: 0 var(--gt-lid);
+  transition: translate 0.3s ease-out;
+  animation: gato-blink 6s infinite;
+}
+/* the eyeball turns toward the cursor; the pupil goes a little further */
+.app-eye[data-eyes="gato"] .gt-ball { translate: calc(var(--look-x, 0) * 5px) calc(var(--look-y, 0) * 4px); transition: translate 0.2s ease-out; }
+.app-eye[data-eyes="gato"] .gt-pupil {
+  fill: #040504;
+  translate: calc(var(--look-x, 0) * 8px) calc(var(--look-y, 0) * 6px);
+  /* the slit (the same 2 curves as every other shape, so "d" can morph) */
+  d: path("M0 -40C7.5 -19 7.5 19 0 40C-7.5 19 -7.5 -19 0 -40Z");
+  transition: d 0.6s ease, translate 0.2s ease-out;
+}
+/* very thin slit: on alert */
+.app-eye[data-eyes="gato"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"], [data-r="picking"]) .gt-pupil {
+  d: path("M0 -40C3.2 -19 3.2 19 0 40C-3.2 19 -3.2 -19 0 -40Z");
+}
+/* dilated: round and big (the cursor very close, a song starting) - fast in, slow back */
+.app-eye[data-eyes="gato"] .eye.dilate:not([data-r="attention"]):not([data-r="timer"]):not([data-r="battery"]):not([data-r="picking"]) .gt-pupil,
+.app-eye[data-eyes="gato"] .eye[data-r="scared"] .gt-pupil {
+  d: path("M0 -29C38.6 -29 38.6 29 0 29C-38.6 29 -38.6 -29 0 -29Z");
+  transition: d 0.22s ease-out, translate 0.2s ease-out;
+}
+/* content (done / seen): half-closed lids and soft, rounder pupils */
+.app-eye[data-eyes="gato"] .eye:is([data-r="done"], [data-r="seen"]):not(.dilate) .gt-pupil {
+  d: path("M0 -30C16 -24 16 24 0 30C-16 24 -16 -24 0 -30Z");
+}
+
+/* ---------- reactions */
+.app-eye[data-eyes="gato"] .eye[data-r="working"] .gt-ball { animation: gato-look 2.6s ease-in-out infinite; }
+.app-eye[data-eyes="gato"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"]) .gt-ball { animation: gato-pulse 1s ease-in-out infinite; }
+.app-eye[data-eyes="gato"] .eye[data-r="done"] .gt-eye::after { animation: gato-slowblink 4.5s ease-in-out infinite; }
+.app-eye[data-eyes="gato"] .eye:is([data-r="seen"], [data-r="attention"], [data-r="timer"], [data-r="battery"], [data-r="picking"], [data-r="scared"], [data-r="whatsapp"]) .gt-eye::after { animation: none; }
+.app-eye[data-eyes="gato"] .eye[data-r="whatsapp"][data-side="right"] .gt-eye::after { animation: gato-wink 2.8s ease-in-out infinite; }
+.app-eye[data-eyes="gato"] .eye[data-r="picking"] .gt-glint { opacity: 0; }
+/* dragged: fear. Round pupils, bristling fur around the eye, trembling */
+.app-eye[data-eyes="gato"] .gt-fur { fill: none; stroke: color-mix(in srgb, var(--g1) 55%, #fff); stroke-width: 3; stroke-linejoin: round; opacity: 0; scale: 0.85; transition: opacity 0.25s, scale 0.25s; }
+.app-eye[data-eyes="gato"] .eye.light .gt-fur { stroke: #2a332c; }
+.app-eye[data-eyes="gato"] .eye[data-r="scared"] .gt-fur { opacity: 0.8; scale: 1; }
+.app-eye[data-eyes="gato"] .eye[data-r="scared"] .gt-eye { animation: gato-shake 0.12s linear infinite alternate; }
+
+.app-eye[data-eyes="gato"] .eye.hold *,
+.app-eye[data-eyes="gato"] .eye.hold *::before,
+.app-eye[data-eyes="gato"] .eye.hold *::after { animation-play-state: paused !important; transition: none !important; }
+.app-eye[data-eyes="gato"] .eye.hold { transition: none !important; }
+
+@keyframes gato-blink { 0%, 93%, 100% { translate: 0 var(--gt-lid); } 96% { translate: 0 0; } }
+@keyframes gato-slowblink { 0%, 55%, 100% { translate: 0 var(--gt-lid); } 70%, 78% { translate: 0 0; } }
+@keyframes gato-wink { 0%, 62%, 82%, 100% { translate: 0 var(--gt-lid); } 70%, 74% { translate: 0 0; } }
+@keyframes gato-look { 0%, 100% { translate: -9px 0; } 50% { translate: 9px 0; } }
+@keyframes gato-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes gato-shake { from { translate: -2.5% 1.5%; } to { translate: 2.5% -1.5%; } }
+
+/* ============================================================== 2. the notch becomes the cat head
+   Exact cat art from reference (gato.png, 560x212, aspect 2.641) overlaid on ::after (z-index: 2) with
+   transparent eye cutouts so Hawk's live cat SVG eyes (z-index: 1) track, dilate, recolor and blink cleanly. */
+.app-eye[data-eyes="gato"] {
+  --tn-hw-pad: 0px;
+  --tn-hw-mult: 1.19048;
+  --tn-hh-mult: 2.23;
+  --tn-eh-mult: 0.50;
+  --tn-eye-aspect: 1.44;
+  --tn-ey-ratio: 0.316;
+  --tn-eye-gap: 0.419;
+}
+.app-eye[data-eyes="gato"]:not(.clock-mode) #island.collapsed,
+.app-eye[data-eyes="gato"]:not(.clock-mode) :is(.eyes-pv, #sizePreview, .cust-notch) {
+  --bg-eh: calc(var(--bg-hh) * 0.50);
+  --bg-ew: calc(var(--bg-eh) * 1.44);
+}
+.app-eye[data-eyes="gato"]:not(.clock-mode) #island.collapsed::after,
+.app-eye[data-eyes="gato"]:not(.clock-mode) #island.collapsed .notch::before,
+.app-eye[data-eyes="gato"]:not(.clock-mode) :is(.eyes-pv, #sizePreview, .cust-notch)::before {
+  content: none;
+}
+.app-eye[data-eyes="gato"]:not(.clock-mode) #island.collapsed .notch .eye,
+.app-eye[data-eyes="gato"]:not(.clock-mode) :is(.eyes-pv, #sizePreview, .cust-notch) .eye {
+  position: relative;
+  z-index: 1;
+}
+.app-eye[data-eyes="gato"]:not(.clock-mode) #island.collapsed .notch::after,
+.app-eye[data-eyes="gato"]:not(.clock-mode) :is(.eyes-pv, #sizePreview, .cust-notch)::after {
+  z-index: 2;
+  background: url("./gato.png") center / 100% 100% no-repeat;
+  -webkit-mask: none;
+  mask: none;
+}
+.app-eye[data-eyes="gato"]:not(.clock-mode) #island.collapsed.dragging {
+  --bg-hh: calc(var(--nh, 34px) * 2.23);
+  --bg-eh: calc(var(--bg-hh) * 0.50);
+  --bg-ew: calc(var(--bg-eh) * 1.44);
+  --bg-ey: calc(var(--bg-hh) * 0.316);
+}
+.app-eye[data-eyes="gato"]:not(.clock-mode) #island.collapsed.dragging .notch::after {
+  top: 0;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-eye[data-eyes="gato"] .eye *,
+  .app-eye[data-eyes="gato"] .eye *::before,
+  .app-eye[data-eyes="gato"] .eye *::after { animation: none !important; }
+}
+/* Hawk · tema "Dragão Elemental" (dragao). SVG com viewBox -60..60 × -50..50. As cores e as partículas de cada
+   elemento trocam em ~500 ms (transições de stop-color e opacity). */
+
+.app-eye[data-eyes="dragao"] .eye {
+  --ew: min(calc(var(--eh) * 1.34), calc(var(--nw, 168px) * 0.2 - var(--eh) * 0.575));
+  /* idle: emerald green dragon eye (#1df27d) with glow, or user custom color */
+  --iris: var(--user-eye, #1df27d);
+  --g0: color-mix(in srgb, var(--iris) 42%, #ecfff5);
+  --g1: var(--iris);
+  --g2: color-mix(in srgb, var(--iris) 58%, #063d1f);
+  --c: var(--iris);
+  --dg-lid: -8px;   /* the upper lid's position (negative = more open) */
+  --dg-tilt: 12deg; /* the brow: inner end lower */
+}
+.app-eye[data-eyes="dragao"] .eye[data-side="right"] { --dg-tilt: -11deg; }
+.app-eye[data-eyes="dragao"] .eye[data-r="attention"] { --c: #ffb020; --g0: #ffe7b0; --g1: #ffb020; --g2: #8f5200; --dg-lid: -14px; }
+.app-eye[data-eyes="dragao"] .eye[data-r="done"]      { --c: #4b9bff; --g0: #dcebff; --g1: #4b9bff; --g2: #173e85; --dg-lid: -40px; }
+.app-eye[data-eyes="dragao"] .eye[data-r="seen"]      { --c: #34c759; --g0: #d5f7dd; --g1: #34c759; --g2: #135f27; --dg-lid: -40px; }
+.app-eye[data-eyes="dragao"] .eye[data-r="whatsapp"]  { --c: #25d366; --g0: #d0f8e0; --g1: #25d366; --g2: #0b6a31; }
+.app-eye[data-eyes="dragao"] .eye[data-r="timer"]     { --c: #ffc53d; --g0: #fff3cc; --g1: #ffc53d; --g2: #9a6c00; --dg-lid: -10px; }
+.app-eye[data-eyes="dragao"] .eye[data-r="battery"]   { --c: #ff3b30; --g0: #ffcdc9; --g1: #ff3b30; --g2: #8a120b; --dg-lid: -10px; }
+.app-eye[data-eyes="dragao"] .eye[data-r="picking"]   { --c: var(--pick); --g0: var(--pick); --g1: var(--pick); --g2: var(--pick); --dg-lid: -16px; }
+.app-eye[data-eyes="dragao"] .eye[data-r="scared"]    { --c: #ffe9c7; --g0: #ffffff; --g1: #ffe1a6; --g2: #b9875a; --dg-lid: -22px; --dg-tilt: -10deg; }
+.app-eye[data-eyes="dragao"] .eye[data-r="scared"][data-side="right"] { --dg-tilt: 10deg; }
+/* the elements (only over the calm states: an alert keeps its own colour) */
+.app-eye[data-eyes="dragao"] .eye[data-el="fire"]:is([data-r="idle"], [data-r="working"]) { --c: #ff7a1a; --g0: #fff3c4; --g1: #ff7a1a; --g2: #9c1a04; --dg-lid: 3px; }
+.app-eye[data-eyes="dragao"] .eye[data-el="ice"]:is([data-r="idle"], [data-r="working"]) { --c: #9be7ff; --g0: #ffffff; --g1: #9be7ff; --g2: #2f78b5; }
+.app-eye[data-eyes="dragao"] .eye[data-el="thunder"] { --c: #9b5cff; --g0: #f1e6ff; --g1: #9b5cff; --g2: #3d1595; --dg-lid: -12px; }
+
+.app-eye[data-eyes="dragao"] .dg-eye { position: absolute; inset: 0; }
+.app-eye[data-eyes="dragao"] .dg-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.app-eye[data-eyes="dragao"] .eye.glow .dg-svg { filter: drop-shadow(0 0 calc(var(--eh) * 0.1) color-mix(in srgb, var(--c) 60%, transparent)); }
+
+.app-eye[data-eyes="dragao"] .dg-s0 { stop-color: var(--g0); transition: stop-color 0.5s; }
+.app-eye[data-eyes="dragao"] .dg-s1 { stop-color: var(--g1); transition: stop-color 0.5s; }
+.app-eye[data-eyes="dragao"] .dg-s2 { stop-color: var(--g2); transition: stop-color 0.5s; }
+.app-eye[data-eyes="dragao"] .dg-f0 { stop-color: var(--g0); stop-opacity: 0.9; transition: stop-color 0.5s; }
+.app-eye[data-eyes="dragao"] .dg-f1 { stop-color: var(--g1); stop-opacity: 0; transition: stop-color 0.5s; }
+.app-eye[data-eyes="dragao"] .dg-base { fill: #070b12; }
+.app-eye[data-eyes="dragao"] .dg-rim { fill: none; stroke: #0e131e; stroke-width: 3.4; }
+.app-eye[data-eyes="dragao"] .eye.light .dg-rim { stroke: #0b0f18; stroke-width: 4.2; }
+
+/* the heavy upper lid with a faint scale texture, tilted into a frown */
+.app-eye[data-eyes="dragao"] .dg-lid {
+  rotate: var(--dg-tilt); translate: 0 var(--dg-lid);
+  transition: translate 0.35s ease-out, rotate 0.35s ease-out;
+  animation: dragao-blink 6.5s infinite;
+}
+.app-eye[data-eyes="dragao"] .dg-lidskin { fill: #161d2b; }
+.app-eye[data-eyes="dragao"] .dg-lidscales { opacity: 0.34; }
+.app-eye[data-eyes="dragao"] .dg-scale { fill: none; stroke: color-mix(in srgb, var(--g1) 18%, #3a465e); stroke-width: 1.1; transition: stroke 0.5s; }
+.app-eye[data-eyes="dragao"] .dg-lidedge { fill: none; stroke: color-mix(in srgb, var(--g1) 42%, #2b354b); stroke-width: 2.3; transition: stroke 0.5s; }
+/* the lower lid only rises for the happy squint (done / seen), leaving an arch of iris ( ^ ) */
+.app-eye[data-eyes="dragao"] .dg-low { fill: #161d2b; translate: 0 70px; transition: translate 0.45s cubic-bezier(0.3, 1.3, 0.5, 1); }
+.app-eye[data-eyes="dragao"] .eye:is([data-r="done"], [data-r="seen"]) .dg-low { translate: 0 0; }
+
+/* the iris glows from inside; separate pupil <g> tracks the pointer cleanly */
+.app-eye[data-eyes="dragao"] .eye:not(.glow) .dg-ball { filter: none; }
+.app-eye[data-eyes="dragao"] .dg-ball { translate: calc(var(--look-x, 0) * 6px) calc(var(--look-y, 0) * 4px); transition: translate 0.2s ease-out; }
+.app-eye[data-eyes="dragao"] .dg-fire { opacity: 0.42; animation: dragao-flicker 2.2s ease-in-out infinite; }
+.app-eye[data-eyes="dragao"] .eye[data-el="fire"] .dg-fire { animation: dragao-flicker 0.7s ease-in-out infinite; }
+.app-eye[data-eyes="dragao"] .eye[data-el="ice"] .dg-fire { animation: none; opacity: 0.25; }
+.app-eye[data-eyes="dragao"] .dg-pupil-g { translate: calc(var(--look-x, 0) * 7px) calc(var(--look-y, 0) * 5px); transition: translate 0.2s ease-out; }
+.app-eye[data-eyes="dragao"] .dg-pupil {
+  fill: #04070b;
+  d: path("M0 -44C3.4 -18 3.4 18 0 44C-3.4 18 -3.4 -18 0 -44Z");
+  transition: d 0.4s ease;
+}
+.app-eye[data-eyes="dragao"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"], [data-r="picking"]) .dg-pupil { d: path("M0 -44C2.4 -20 2.4 20 0 44C-2.4 20 -2.4 -20 0 -44Z"); }
+.app-eye[data-eyes="dragao"] .eye[data-r="scared"] .dg-pupil { d: path("M0 -15C3 -7 3 7 0 15C-3 7 -3 -7 0 -15Z"); }
+
+/* ---------- the elements' particles */
+.app-eye[data-eyes="dragao"] .dg-fx > g { opacity: 0; transition: opacity 0.5s; }
+.app-eye[data-eyes="dragao"] .dg-embers circle { fill: #ffb347; animation: dragao-ember 1.4s ease-out infinite; }
+.app-eye[data-eyes="dragao"] .dg-embers circle:nth-child(2) { fill: #ff7a1a; animation-delay: -0.5s; }
+.app-eye[data-eyes="dragao"] .dg-embers circle:nth-child(3) { animation-delay: -0.9s; }
+.app-eye[data-eyes="dragao"] .dg-embers circle:nth-child(4) { fill: #ffd27a; animation-delay: -0.2s; }
+.app-eye[data-eyes="dragao"] .eye[data-el="fire"] .dg-embers { opacity: 1; }
+.app-eye[data-eyes="dragao"] .dg-frost path { fill: #eafcff; transform-box: fill-box; transform-origin: center; animation: dragao-twinkle 2.4s ease-in-out infinite; }
+.app-eye[data-eyes="dragao"] .dg-frost path:nth-child(2) { animation-delay: -0.6s; }
+.app-eye[data-eyes="dragao"] .dg-frost path:nth-child(3) { animation-delay: -1.2s; }
+.app-eye[data-eyes="dragao"] .dg-frost path:nth-child(4) { animation-delay: -1.8s; }
+.app-eye[data-eyes="dragao"] .eye.light .dg-frost path { fill: #2f86c7; }
+.app-eye[data-eyes="dragao"] .eye[data-el="ice"] .dg-frost { opacity: 1; }
+.app-eye[data-eyes="dragao"] .dg-sparks path { fill: none; stroke: #e2d0ff; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round; animation: dragao-zap 0.45s steps(1) infinite; }
+.app-eye[data-eyes="dragao"] .dg-sparks path:nth-child(2) { stroke: #b38aff; animation-delay: -0.15s; }
+.app-eye[data-eyes="dragao"] .dg-sparks path:nth-child(3) { animation-delay: -0.3s; }
+.app-eye[data-eyes="dragao"] .eye.light .dg-sparks path { stroke: #6b2fd6; }
+.app-eye[data-eyes="dragao"] .eye[data-el="thunder"] .dg-sparks { opacity: 1; }
+.app-eye[data-eyes="dragao"] .eye[data-el="thunder"] .dg-fire { animation: dragao-flash 0.45s steps(1) infinite; }
+
+/* ---------- reactions */
+.app-eye[data-eyes="dragao"] .eye[data-r="working"] .dg-ball { animation: dragao-look 2.6s ease-in-out infinite; }
+.app-eye[data-eyes="dragao"] .eye:is([data-r="attention"], [data-r="timer"], [data-r="battery"]) .dg-ball { animation: dragao-pulse 1s ease-in-out infinite; }
+.app-eye[data-eyes="dragao"] .eye:not([data-r="idle"]):not([data-r="working"]) .dg-lid { animation: none; }
+.app-eye[data-eyes="dragao"] .eye[data-r="whatsapp"]:not([data-el="thunder"])[data-side="right"] .dg-lid { animation: dragao-wink 2.8s ease-in-out infinite; }
+.app-eye[data-eyes="dragao"] .eye[data-r="picking"] .dg-fire { opacity: 0; animation: none; }
+.app-eye[data-eyes="dragao"] .eye[data-r="scared"] .dg-eye { animation: dragao-shake 0.12s linear infinite alternate; }
+
+.app-eye[data-eyes="dragao"] .eye.hold *,
+.app-eye[data-eyes="dragao"] .eye.hold *::before,
+.app-eye[data-eyes="dragao"] .eye.hold *::after { animation-play-state: paused !important; transition: none !important; }
+.app-eye[data-eyes="dragao"] .eye.hold { transition: none !important; }
+
+/* the lid is a tall panel (theme.js) so sliding it down 76 covers the whole eye, tilted corners included */
+@keyframes dragao-blink { 0%, 93%, 100% { translate: 0 var(--dg-lid); } 95.5%, 96.5% { translate: 0 76px; } }
+@keyframes dragao-wink { 0%, 62%, 82%, 100% { translate: 0 var(--dg-lid); } 70%, 74% { translate: 0 76px; } }
+@keyframes dragao-flicker { 0%, 100% { opacity: 0.45; scale: 1; } 23% { opacity: 0.7; scale: 1.08; } 41% { opacity: 0.35; scale: 0.96; } 67% { opacity: 0.8; scale: 1.12; } 84% { opacity: 0.5; scale: 1; } }
+@keyframes dragao-flash { 0% { opacity: 0.9; } 30% { opacity: 0.2; } 60% { opacity: 0.7; } }
+@keyframes dragao-ember { 0% { translate: 0 6px; opacity: 0; } 25% { opacity: 1; } 100% { translate: 3px -22px; opacity: 0; } }
+@keyframes dragao-twinkle { 0%, 100% { opacity: 0.2; scale: 0.6; } 50% { opacity: 1; scale: 1; } }
+@keyframes dragao-zap { 0% { opacity: 1; } 34% { opacity: 0; } 67% { opacity: 0.8; } }
+@keyframes dragao-look { 0%, 100% { translate: -8px 0; } 50% { translate: 8px 0; } }
+@keyframes dragao-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes dragao-shake { from { translate: -2.5% 1.5%; } to { translate: 2.5% -1.5%; } }
+
+/* ============================================================== 2. the notch becomes the dragon head
+   Uses the extracted transparent dragon art (head.png, 560x207, aspect 2.705) overlaid on ::after (z-index: 2)
+   with transparent eye cutouts so the live animated SVG eyes (z-index: 1) track, glow and blink behind the real brows. */
+.app-eye[data-eyes="dragao"] {
+  --tn-hw-pad: 0px;
+  --tn-hw-mult: 1.36905;
+  --tn-hh-mult: 2.5;
+  --tn-eh-mult: 0.31;
+  --tn-eye-aspect: 1.48;
+  --tn-ey-ratio: 0.278;
+  --tn-eye-gap: 0.34;
+}
+.app-eye[data-eyes="dragao"]:not(.clock-mode) #island.collapsed::after,
+.app-eye[data-eyes="dragao"]:not(.clock-mode) #island.collapsed .notch::before,
+.app-eye[data-eyes="dragao"]:not(.clock-mode) :is(.eyes-pv, #sizePreview, .cust-notch)::before {
+  content: none;
+}
+.app-eye[data-eyes="dragao"]:not(.clock-mode) #island.collapsed .notch .eye {
+  position: relative;
+  z-index: 1;
+}
+.app-eye[data-eyes="dragao"]:not(.clock-mode) #island.collapsed .notch::after,
+.app-eye[data-eyes="dragao"]:not(.clock-mode) :is(.eyes-pv, #sizePreview, .cust-notch)::after {
+  z-index: 2;
+  background: url("./head.png") center / 100% 100% no-repeat;
+  -webkit-mask: none;
+  mask: none;
+}
+/* keep the exact same head geometry while dragging */
+.app-eye[data-eyes="dragao"]:not(.clock-mode) #island.collapsed.dragging {
+  --bg-hh: calc(var(--nh, 34px) * 2.5);
+  --bg-eh: min(calc(var(--bg-hh) * 0.31), calc(var(--bg-hw) * 0.19));
+  --bg-ey: calc(var(--bg-hh) * 0.278);
+}
+.app-eye[data-eyes="dragao"]:not(.clock-mode) #island.collapsed.dragging .notch::after {
+  top: 0;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-eye[data-eyes="dragao"] .eye *,
+  .app-eye[data-eyes="dragao"] .eye *::before,
+  .app-eye[data-eyes="dragao"] .eye *::after { animation: none !important; }
+}
