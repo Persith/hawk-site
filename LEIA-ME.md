@@ -42,7 +42,7 @@ Depois abra `http://127.0.0.1:8765`. Abrir o `index.html` com dois cliques tamb�
 - **Download:** o botão aponta para `https://github.com/Persith/hawk-releases/releases/latest/download/Hawk-Setup.exe`, que é o instalador da última versão publicada.
 
 ## Falta antes de publicar
-1. **Nome e CPF ou CNPJ do vendedor** em `termos.html`, na seção "Quem somos", no lugar de `[NOME COMPLETO OU RAZÃO SOCIAL]` e `[CPF OU CNPJ]`. O Decreto 7.962/2013 exige essa identificação, e ela fica pública. Se houver CNPJ, por exemplo de MEI, prefira ele.
+1. **Endereço físico do vendedor** em `termos.html`, na seção "Quem somos". O Decreto 7.962/2013 também pede o endereço; o nome (Filipe C. Maia) e o CNPJ do MEI já estão lá. O dono vai trocar o endereço do MEI para um comercial antes.
 2. **Revisar as promessas:** "Todas as atualizações"; pagamento com Pix, cartão ou saldo; os dados do notch ficam só no PC; as descrições dos recursos e dos pacotes.
 3. **O servidor e o app alinhados com os preços novos** (veja `docs/alinhar-hawk-com-site.md`):
    - o catálogo com R$ 14,99, os pacotes, o Hawk Completo, os olhos a R$ 3,90 e o Galáxia;
