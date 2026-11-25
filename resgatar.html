@@ -252,7 +252,14 @@
           noteEl.hidden = true;
           titleEl.textContent = 'Pronto! O item já está na sua conta.';
           subEl.textContent = 'Se o Hawk já está aberto, ele atualiza sozinho em instantes.';
-          actionsEl.replaceChildren(makeDownloadBtn());
+          var row = document.createElement('div');
+          row.className = 'buy-row';
+          var home = document.createElement('a');
+          home.className = 'btn btn-ghost';
+          home.href = 'index.html';
+          home.textContent = 'Ir para o site';
+          row.append(home, makeDownloadBtn());
+          actionsEl.replaceChildren(row);
           return;
         }
         var errState = res.data && res.data.estado;
