@@ -605,7 +605,7 @@ button.price.buy:active { transform: scale(0.96); }
 .page-hero .lead { font-size: 19px; color: var(--ink-2); margin: 20px 0 30px; max-width: 640px; }
 .back-link { display: inline-block; color: var(--blue-hi); text-decoration: none; font-weight: 600; margin-bottom: 20px; }
 .back-link:hover { text-decoration: underline; }
-.packs-page { display: grid; gap: 28px; }
+.feature .wrap.packs-page { display: grid; gap: 28px; } /* (.feature .wrap is display: block) */
 .pack-head { display: grid; grid-template-columns: auto 1fr auto; gap: 24px; align-items: center; margin-top: 36px; padding: 28px 32px; border-radius: var(--radius); background: linear-gradient(135deg, #2c5cf0, #1c3fb8 60%, #17278a); scroll-margin-top: 96px; }
 .pack-head:first-child { margin-top: 0; }
 .pack-head .pack-ico { margin: 0; width: 60px; height: 60px; border-radius: 18px; background: rgba(255, 255, 255, 0.16); color: #fff; }
