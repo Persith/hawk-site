@@ -21,12 +21,12 @@ Em 1 ou 2 minutos, o Pages atualiza sozinho. A rede do PC do serviço bloqueia `
   - a seção Olhos, com os 12 estilos;
   - Preços, Dúvidas, a chamada final e o rodapé.
 - `pacotes.html`: os detalhes do Pacote Desenvolvedor e do Pacote LAN Local, com prints e o que cada serviço faz. O botão "Detalhes" dos cartões dos pacotes abre esta página.
+- `resgatar.html`: página de resgate de presentes por link (`resgatar.html?c=<codigo>`). Mostra quem enviou (apelido), o recado opcional e o botão **Resgatar** depois que a pessoa entra com Google.
 - `termos.html`: Termos de uso, Reembolso (`#reembolso`) e Privacidade (`#privacidade`).
-- `style.css`: os estilos das três páginas. As cores ficam em `:root` (`--bg`, `--blue`, `--eye`...).
+- `style.css`: os estilos das páginas. As cores ficam em `:root` (`--bg`, `--blue`, `--eye`...).
 - `loja.js`: a conta e a loja do site.
-  - O botão Entrar do cabeçalho usa o Supabase Auth (Google ou e-mail e senha, a mesma conta do app). Ele também tem Criar conta e "Minha conta", com nome de usuário e Sair.
-  - Todo elemento com a classe `buy` e `data-item` abre a janela de compra ("Para mim" ou "De presente"). A compra chama a função `checkout` e leva ao Mercado Pago.
-  - Presentes ficam desligados por `GIFTS_READY = false` até o servidor tratar presentes (veja `docs/alinhar-hawk-com-site.md`).
+  - O botão Entrar do cabeçalho usa o Supabase Auth com login somente pelo Google (a mesma conta do app). Na primeira entrada, pede o nome de usuário (`apelido`) se estiver vazio, e "Minha conta" mostra **Presentes que dei**, com os links de resgate.
+  - Todo elemento com a classe `buy` e `data-item` abre a janela de compra ("Para mim" ou "De presente", só com o recado opcional). A compra chama a função `checkout` e leva ao Mercado Pago; na volta, se o presente já estiver pago, mostra o link pronto para copiar ou mandar pelo WhatsApp.
 - `olhos/`: os estilos de olhos copiados do app, para os cartões da seção Olhos ficarem iguais ao Hawk.
   - Os temas são `cyber`, `hal`, `led`, `eink`, `gato`, `dragao` e `equalizer`. O `temas.css` tem o CSS deles com `body[data-eyes=` trocado por `.app-eye[data-eyes=`.
   - O `runner.js` monta cada tema no seu cartão.

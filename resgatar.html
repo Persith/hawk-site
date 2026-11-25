@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resgatar presente · Hawk</title>
+  <meta name="description" content="Resgate seu presente no Hawk entrando com sua conta Google.">
+  <meta name="theme-color" content="#0a0f3a">
+  <link rel="icon" href="assets/hawk-icone.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://qtflyunebpskussorwjf.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://accounts.google.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top scrolled">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/hawk-icone.svg" alt="">Hawk</a>
+    <nav class="nav">
+      <a href="index.html#precos">Preços</a>
+      <a href="index.html#olhos">Olhos</a>
+      <a class="btn btn-light btn-sm" href="index.html">Voltar ao site</a>
+    </nav>
+  </div>
+</header>
+
+<main class="redeem-wrap">
+  <div class="redeem-card" id="redeemCard">
+    <div class="redeem-badge">Presente no Hawk</div>
+    <h1 id="redeemTitle">Carregando presente…</h1>
+    <p class="redeem-sub" id="redeemSub"></p>
+    <div class="redeem-from" id="redeemFrom" hidden></div>
+    <blockquote class="redeem-note" id="redeemNote" hidden></blockquote>
+    <div class="redeem-actions" id="redeemActions"></div>
+    <div class="buy-msg" id="redeemMsg" role="status"></div>
+    <div class="redeem-user" id="redeemUser" hidden></div>
+  </div>
+</main>
+
+<footer style="padding:32px 0">
+  <div class="wrap">
+    <div>© 2026 Hawk · <a href="mailto:assistentehawk@gmail.com">assistentehawk@gmail.com</a></div>
+    <div><a href="termos.html">Termos e Privacidade</a></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(function () {
+  var SUPABASE_URL = 'https://qtflyunebpskussorwjf.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_IxdUmnST3w6mZGwqg0JdTQ_S7dfWT-Y';
+  var DOWNLOAD_URL = 'https://github.com/Persith/hawk-releases/releases/latest/download/Hawk-Setup.exe';
+  var CODE_STORE = 'hawk-redeem-code';
+  var G_ICO = '<svg class="g-ico" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.2 14.6 2.2 12 2.2 6.6 2.2 2.3 6.5 2.3 11.9s4.3 9.7 9.7 9.7c5.6 0 9.3-3.9 9.3-9.5 0-.6-.1-1.1-.2-1.6H12z"/></svg>';
+
+  var params = new URLSearchParams(location.search);
+  var code = (params.get('c') || '').trim();
+  if (!code) {
+    try {
+      code = (sessionStorage.getItem(CODE_STORE) || '').trim();
+      sessionStorage.removeItem(CODE_STORE);
+    } catch (e) { code = ''; }
+  }
+
+  var titleEl = document.getElementById('redeemTitle');
+  var subEl = document.getElementById('redeemSub');
+  var fromEl = document.getElementById('redeemFrom');
+  var noteEl = document.getElementById('redeemNote');
+  var actionsEl = document.getElementById('redeemActions');
+  var msgEl = document.getElementById('redeemMsg');
+  var userEl = document.getElementById('redeemUser');
+
+  var sb = window.supabase
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { flowType: 'pkce', persistSession: true, detectSessionInUrl: true },
+      })
+    : null;
+
+  function setMsg(text, ok) {
+    msgEl.textContent = text || '';
+    msgEl.classList.toggle('ok', !!ok);
+  }
+
+  function showInvalid(text) {
+    titleEl.textContent = text || 'Este link de presente não é válido.';
+    subEl.textContent = 'Confira se o link foi copiado inteiro.';
+    fromEl.hidden = true;
+    noteEl.hidden = true;
+    actionsEl.textContent = '';
+    var back = document.createElement('a');
+    back.className = 'btn btn-ghost';
+    back.href = 'index.html';
+    back.textContent = 'Ir para o site do Hawk';
+    actionsEl.appendChild(back);
+  }
+
+  function renderUserFooter(session) {
+    if (!session || !session.user) {
+      userEl.hidden = true;
+      userEl.textContent = '';
+      return;
+    }
+    userEl.textContent = '';
+    var span = document.createElement('span');
+    span.textContent = 'Conectado como ' + (session.user.email || '');
+    var switchBtn = document.createElement('button');
+    switchBtn.type = 'button';
+    switchBtn.className = 'buy-link';
+    switchBtn.textContent = 'Trocar conta';
+    switchBtn.addEventListener('click', function () {
+      sb.auth.signOut().then(load);
+    });
+    userEl.append(span, switchBtn);
+    userEl.hidden = false;
+  }
+
+  function makeDownloadBtn() {
+    var a = document.createElement('a');
+    a.className = 'btn btn-light';
+    a.href = DOWNLOAD_URL;
+    a.textContent = 'Baixar o Hawk';
+    return a;
+  }
+
+  function makeShareBtns() {
+    var url = location.origin + location.pathname + '?c=' + encodeURIComponent(code);
+    var wrap = document.createElement('div');
+    wrap.className = 'buy-row';
+
+    var cp = document.createElement('button');
+    cp.type = 'button';
+    cp.className = 'btn btn-ghost';
+    cp.textContent = 'Copiar link';
+    cp.addEventListener('click', function () {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) return;
+      navigator.clipboard.writeText(url).then(function () {
+        cp.textContent = 'Link copiado!';
+        setTimeout(function () { cp.textContent = 'Copiar link'; }, 1600);
+      }, function () {});
+    });
+
+    var wa = document.createElement('a');
+    wa.className = 'btn btn-light';
+    wa.href = 'https://wa.me/?text=' + encodeURIComponent('Te dei um presente no Hawk! Resgate aqui: ' + url);
+    wa.target = '_blank';
+    wa.rel = 'noopener noreferrer';
+    wa.textContent = 'Enviar pelo WhatsApp';
+
+    wrap.append(cp, wa);
+    return wrap;
+  }
+
+  function callPresente(token, acao) {
+    return fetch(SUPABASE_URL + '/functions/v1/presente', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token,
+        apikey: SUPABASE_KEY,
+      },
+      body: JSON.stringify({ acao: acao, codigo: code }),
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        return { ok: r.ok, status: r.status, data: j };
+      });
+    });
+  }
+
+  function renderSignedOut() {
+    renderUserFooter(null);
+    fromEl.hidden = true;
+    noteEl.hidden = true;
+    setMsg('');
+    titleEl.textContent = 'Você ganhou um presente no Hawk';
+    subEl.textContent = 'Entre com sua conta Google para ver e resgatar o presente.';
+    actionsEl.textContent = '';
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-light';
+    btn.innerHTML = G_ICO + 'Entrar com Google para resgatar';
+    btn.addEventListener('click', function () {
+      btn.disabled = true;
+      btn.textContent = 'Abrindo o Google…';
+      try { sessionStorage.setItem(CODE_STORE, code); } catch (e) { /* ignore */ }
+      var back = location.origin + location.pathname + '?c=' + encodeURIComponent(code);
+      sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: back } }).then(function (r) {
+        if (r.error) {
+          btn.disabled = false;
+          btn.innerHTML = G_ICO + 'Entrar com Google para resgatar';
+          setMsg('Não foi possível abrir o login com Google.');
+        }
+      });
+    });
+    actionsEl.appendChild(btn);
+  }
+
+  function renderGiftState(session, info) {
+    renderUserFooter(session);
+    fromEl.hidden = true;
+    noteEl.hidden = true;
+    actionsEl.textContent = '';
+    setMsg('');
+
+    var st = info && info.estado;
+    if (st === 'invalido') {
+      showInvalid('Este link de presente não é válido.');
+      return;
+    }
+    if (st === 'resgatado') {
+      titleEl.textContent = 'Este presente já foi resgatado.';
+      subEl.textContent = info.nome ? 'Item: ' + info.nome : '';
+      return;
+    }
+    if (st === 'proprio') {
+      titleEl.textContent = 'Este presente é seu. Mande o link para quem vai ganhar.';
+      subEl.textContent = info.nome ? 'Item: ' + info.nome : '';
+      actionsEl.appendChild(makeShareBtns());
+      return;
+    }
+    if (st === 'ja_tem') {
+      titleEl.textContent = 'Você já tem este item. Repasse o link para outra pessoa.';
+      subEl.textContent = info.nome ? 'Item: ' + info.nome : '';
+      actionsEl.appendChild(makeShareBtns());
+      return;
+    }
+
+    // disponivel
+    titleEl.textContent = info.nome || 'Presente no Hawk';
+    subEl.textContent = 'Clique abaixo para colocar este item na sua conta.';
+    fromEl.textContent = 'Enviado por ' + (info.de || 'Alguém');
+    fromEl.hidden = false;
+    if (info.recado) {
+      noteEl.textContent = info.recado;
+      noteEl.hidden = false;
+    }
+
+    var redeemBtn = document.createElement('button');
+    redeemBtn.type = 'button';
+    redeemBtn.className = 'btn btn-light';
+    redeemBtn.textContent = 'Resgatar';
+    redeemBtn.addEventListener('click', function () {
+      redeemBtn.disabled = true;
+      redeemBtn.textContent = 'Resgatando…';
+      setMsg('');
+      callPresente(session.access_token, 'resgatar').then(function (res) {
+        if (res.ok && res.data && res.data.ok) {
+          fromEl.hidden = true;
+          noteEl.hidden = true;
+          titleEl.textContent = 'Pronto! O item já está na sua conta.';
+          subEl.textContent = 'Se o Hawk já está aberto, ele atualiza sozinho em instantes.';
+          actionsEl.replaceChildren(makeDownloadBtn());
+          return;
+        }
+        var errState = res.data && res.data.estado;
+        if (errState === 'resgatado' || errState === 'proprio' || errState === 'ja_tem' || errState === 'invalido') {
+          renderGiftState(session, { estado: errState, nome: info.nome });
+          return;
+        }
+        redeemBtn.disabled = false;
+        redeemBtn.textContent = 'Resgatar';
+        setMsg((res.data && res.data.error) || 'Não foi possível resgatar agora. Tente novamente.');
+      }).catch(function () {
+        redeemBtn.disabled = false;
+        redeemBtn.textContent = 'Resgatar';
+        setMsg('Sem conexão. Verifique a internet e tente de novo.');
+      });
+    });
+    actionsEl.appendChild(redeemBtn);
+  }
+
+  function load() {
+    if (!code) {
+      showInvalid('Este link de presente não é válido.');
+      return;
+    }
+    if (!sb) {
+      showInvalid('Não foi possível carregar o resgate. Verifique sua internet.');
+      return;
+    }
+    sb.auth.getSession().then(function (r) {
+      var session = r.data && r.data.session;
+      if (!session) {
+        renderSignedOut();
+        return;
+      }
+      titleEl.textContent = 'Conferindo presente…';
+      subEl.textContent = '';
+      callPresente(session.access_token, 'ver').then(function (res) {
+        if (res.status === 401) {
+          sb.auth.signOut().then(renderSignedOut);
+          return;
+        }
+        if (!res.ok) {
+          titleEl.textContent = 'Não foi possível conferir o presente';
+          subEl.textContent = (res.data && res.data.error) || 'Tente novamente em instantes.';
+          actionsEl.textContent = '';
+          renderUserFooter(session);
+          return;
+        }
+        renderGiftState(session, res.data);
+      }).catch(function () {
+        titleEl.textContent = 'Sem conexão';
+        subEl.textContent = 'Verifique a internet e recarregue esta página.';
+        renderUserFooter(session);
+      });
+    });
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
