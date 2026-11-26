@@ -19,6 +19,7 @@
     'hawk-completo': ['Hawk Completo', 'R$ 29,90'],
     'pacote-dev': ['Pacote Desenvolvedor', 'R$ 7,90'],
     'pacote-lan': ['Pacote LAN Local', 'R$ 7,90'],
+    'pacote-ia': ['Pacote IA', 'R$ 5,90'],
   };
   var EYES = {
     cyber: 'Cyberpunk HUD', hal: 'Lente de câmera', led: 'Matriz de LED', eink: 'Minimalista E-Ink',

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pacotes de expansão · Hawk</title>
-  <meta name="description" content="O que vem no Pacote Desenvolvedor e no Pacote LAN Local do Hawk.">
+  <meta name="description" content="O que vem no Pacote Desenvolvedor, no Pacote LAN Local e no Pacote IA do Hawk.">
   <meta name="theme-color" content="#0a0f3a">
   <link rel="icon" href="assets/hawk-icone.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://qtflyunebpskussorwjf.supabase.co" crossorigin>
@@ -59,10 +59,11 @@
     <div class="wrap">
       <a class="back-link" href="index.html#precos">← Voltar aos preços</a>
       <h1 class="display">Pacotes de expansão</h1>
-      <p class="lead">Mais recursos para o seu Hawk. Cada pacote é pago uma vez só e fica na sua conta para sempre. Os dois vêm juntos no Hawk Completo.</p>
+      <p class="lead">Mais recursos para o seu Hawk. Cada pacote é pago uma vez só e fica na sua conta para sempre. Os três vêm juntos no Hawk Completo.</p>
       <div class="cta">
         <a class="btn btn-ghost" href="#dev">Pacote Desenvolvedor</a>
         <a class="btn btn-ghost" href="#lan">Pacote LAN Local</a>
+        <a class="btn btn-ghost" href="#ia">Pacote IA</a>
       </div>
     </div>
   </section>
@@ -156,6 +157,187 @@
         </div>
         <div class="visual"><div class="shot-frame"><img src="assets/pacotes/celular.png" alt="Janela de Arquivos do Celular mostrando as pastas de um Android conectado" loading="lazy"></div></div>
       </div>
+
+      <div class="pack-head reveal" id="ia">
+        <div class="pack-ico"><svg><use href="#i-spark"/></svg></div>
+        <div class="pack-head-text">
+          <h2 class="display">Pacote IA</h2>
+          <p>O Hawk avisa no notch o que as suas IAs estão fazendo, sem você ter de ficar olhando a janela delas.</p>
+        </div>
+        <div class="pack-head-buy">
+          <div class="val">R$ 5,90 <small>único</small></div>
+          <button class="btn btn-light buy" data-item="pacote-ia">Comprar</button>
+        </div>
+      </div>
+
+      <div class="feature-card stack reveal" id="claude">
+        <div class="stack-text">
+          <div>
+            <div class="kicker"><span class="dot"></span>Claude Code · O mais completo</div>
+            <h2 class="display">Acompanhe e aja direto pelo notch</h2>
+          </div>
+          <div>
+            <p>É o único card em que dá para agir sem trocar de janela. Conectado pelos hooks locais do Claude Code, ele mostra quando está trabalhando, terminou ou precisa de você.</p>
+            <ul>
+              <li><svg><use href="#i-check"/></svg>Pedido de permissão no notch: aprove ou recuse a ação na hora, ou mande para o terminal</li>
+              <li><svg><use href="#i-check"/></svg>Responder perguntas do Claude direto pelo painel (opção única ou múltipla escolha)</li>
+              <li><svg><use href="#i-check"/></svg>Quatro fases visíveis (Ler, Editar, Executar, Pronto) e tempo corrido da tarefa</li>
+              <li><svg><use href="#i-check"/></svg>Aviso quando termina, botão Ver resposta e campo para enviar a próxima tarefa</li>
+            </ul>
+          </div>
+        </div>
+        <div class="visual">
+          <div class="ia-mock-wrap" aria-label="Simulação do card do Claude Code no notch do Hawk">
+            <div class="ia-notch">
+              <div class="ia-notch-phases">
+                <span class="on">Ler</span><span class="on cur">Editar</span><span>Executar</span><span>Pronto</span>
+              </div>
+              <div class="ia-notch-top">
+                <span class="ia-brand"><i class="ia-dot claude"></i>Claude Code · projeto-exemplo</span>
+                <span class="ia-timer">00:48</span>
+              </div>
+              <div class="ia-notch-box">
+                <div class="ia-box-head"><span class="ia-chip ask">Permissão</span><code>src/app.js</code></div>
+                <p class="ia-box-body">Editar arquivo <code>app.js</code> para atualizar a rota de pedidos</p>
+                <div class="ia-btns">
+                  <span class="ia-btn allow">Permitir</span>
+                  <span class="ia-btn deny">Recusar</span>
+                  <span class="ia-btn">Terminal</span>
+                </div>
+              </div>
+            </div>
+            <div class="ia-notch compact">
+              <div class="ia-notch-top">
+                <span class="ia-brand"><i class="ia-dot ok"></i>Claude Code terminou · 01:42</span>
+                <span class="ia-btn reply">Ver resposta</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card stack reveal" id="antigravity">
+        <div class="stack-text">
+          <div>
+            <div class="kicker"><span class="dot"></span>Antigravity</div>
+            <h2 class="display">Acompanhe sem perder o foco</h2>
+          </div>
+          <div>
+            <p>Acompanha o Antigravity do Google pelo histórico local do agente e avisa no notch quando ele está trabalhando ou terminou.</p>
+            <ul>
+              <li><svg><use href="#i-check"/></svg>Mostra as fases, o tempo da tarefa e o total de tarefas feitas no dia</li>
+              <li><svg><use href="#i-check"/></svg>Botão Ver resposta pelo Hawk em janela própria (somente leitura)</li>
+              <li><svg><use href="#i-check"/></svg>Aprovar e responder não ficam disponíveis porque o Antigravity não aceita comandos de fora</li>
+            </ul>
+          </div>
+        </div>
+        <div class="visual">
+          <div class="ia-mock-wrap" aria-label="Simulação do card do Antigravity no notch do Hawk">
+            <div class="ia-notch">
+              <div class="ia-notch-top">
+                <span class="ia-brand"><i class="ia-dot ag"></i>Antigravity · painel-demo</span>
+                <span class="ia-state-pill done">Terminou · 02:14</span>
+              </div>
+              <div class="ia-notch-box">
+                <div class="ia-box-head"><span class="ia-chip">Concluído</span><span>4 tarefas hoje</span></div>
+                <p class="ia-box-body">Ajustes no layout concluídos e verificados.</p>
+                <div class="ia-btns">
+                  <span class="ia-btn reply">Ver resposta</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card stack reveal" id="chatgpt">
+        <div class="stack-text">
+          <div>
+            <div class="kicker"><span class="dot"></span>ChatGPT</div>
+            <h2 class="display">Aviso assim que a resposta fica pronta</h2>
+          </div>
+          <div>
+            <p>Observa a janela do app ChatGPT no Windows e avisa no notch quando a resposta termina de gerar, sem precisar de conta nem senha.</p>
+            <ul>
+              <li><svg><use href="#i-check"/></svg>Mostra quando está escrevendo e muda para pronta quando termina</li>
+              <li><svg><use href="#i-check"/></svg>Conta as respostas concluídas no dia direto no card</li>
+              <li><svg><use href="#i-check"/></svg>Um clique no card traz o app do ChatGPT para a frente</li>
+            </ul>
+          </div>
+        </div>
+        <div class="visual">
+          <div class="ia-mock-wrap" aria-label="Simulação do card do ChatGPT no notch do Hawk">
+            <div class="ia-notch">
+              <div class="ia-notch-top">
+                <span class="ia-brand"><i class="ia-dot gpt"></i>ChatGPT</span>
+                <span class="ia-state-pill done">Resposta pronta</span>
+              </div>
+              <div class="ia-notch-box">
+                <div class="ia-box-head"><span class="ia-chip ok">App Windows</span><span>6 respostas hoje</span></div>
+                <p class="ia-box-body">Clique no card do ChatGPT para trazer a janela à frente.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card ia-compare-card reveal">
+        <div class="ia-compare-head">
+          <div>
+            <div class="kicker"><span class="dot"></span>Comparação dos 3 cards</div>
+            <h2 class="display">O que cada IA faz no Hawk</h2>
+          </div>
+          <p>O Claude Code é o único em que você pode aprovar, recusar e responder direto pelo notch.</p>
+        </div>
+        <div class="ia-table-wrap">
+          <table class="ia-table">
+            <thead>
+              <tr>
+                <th>Recurso no Hawk</th>
+                <th class="hl-col">Claude Code</th>
+                <th>Antigravity</th>
+                <th>ChatGPT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Como acompanha</td>
+                <td>Hooks locais no PC</td>
+                <td>Histórico local do agente</td>
+                <td>Janela do app no Windows</td>
+              </tr>
+              <tr>
+                <td>Avisa trabalhando e quando termina</td>
+                <td>Sim (4 fases + cronômetro)</td>
+                <td>Sim (4 fases + cronômetro)</td>
+                <td>Sim (escrevendo e pronta)</td>
+              </tr>
+              <tr>
+                <td>Aprovar ou recusar pedido no notch</td>
+                <td><strong>Sim (Permitir / Recusar)</strong></td>
+                <td>Não</td>
+                <td>Não</td>
+              </tr>
+              <tr>
+                <td>Responder perguntas pelo notch</td>
+                <td><strong>Sim</strong></td>
+                <td>Não</td>
+                <td>Não</td>
+              </tr>
+              <tr>
+                <td>Ver resposta pelo Hawk</td>
+                <td>Sim (com envio da próxima tarefa)</td>
+                <td>Sim (somente leitura)</td>
+                <td>Traz a janela do app à frente</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ia-end-cta">
+          <button class="btn btn-light buy" data-item="pacote-ia">Comprar por R$ 5,90</button>
+          <a class="btn btn-ghost" href="index.html#precos">Voltar aos preços</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -164,7 +346,7 @@
       <div class="final-card stars reveal">
         <div class="notch-static"><div class="eyes"><div class="eye"></div><div class="eye"></div></div></div>
         <h2 class="display">Quer tudo? Leve o Hawk Completo</h2>
-        <p>O Hawk e os dois pacotes por R$ 29,90, pagamento único. Separado, sairia R$ 30,79.</p>
+        <p>O Hawk e os três pacotes por R$ 29,90, pagamento único. Separado, sairia R$ 36,69.</p>
         <div class="cta">
           <button class="btn btn-light buy" data-item="hawk-completo">Comprar o Hawk Completo</button>
         </div>

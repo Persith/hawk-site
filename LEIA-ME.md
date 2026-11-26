@@ -20,7 +20,7 @@ Em 1 ou 2 minutos, o Pages atualiza sozinho. A rede do PC do serviço bloqueia `
   - os blocos de recursos (Música, IAs, Cronômetro e água, Dispositivos) e a grade "E tem muito mais";
   - a seção Olhos, com os 12 estilos;
   - Preços, Dúvidas, a chamada final e o rodapé.
-- `pacotes.html`: os detalhes do Pacote Desenvolvedor e do Pacote LAN Local, com prints e o que cada serviço faz. O botão "Detalhes" dos cartões dos pacotes abre esta página.
+- `pacotes.html`: os detalhes do Pacote Desenvolvedor (`#dev`), do Pacote LAN Local (`#lan`) e do Pacote IA (`#ia`), com prints (Desenvolvedor e LAN), mockups em HTML/CSS do notch e tabela comparativa (Pacote IA). O botão "Detalhes" dos cartões dos pacotes abre esta página.
 - `resgatar.html`: página de resgate de presentes por link (`resgatar.html?c=<codigo>`). Mostra quem enviou (apelido), o recado opcional e o botão **Resgatar** depois que a pessoa entra com Google.
 - `termos.html`: Termos de uso, Reembolso (`#reembolso`) e Privacidade (`#privacidade`).
 - `style.css`: os estilos das páginas. As cores ficam em `:root` (`--bg`, `--blue`, `--eye`...).
