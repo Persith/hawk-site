@@ -2,7 +2,7 @@
 
 Página de apresentação e venda do Hawk, com os Termos de uso e a Política de Privacidade. É HTML, CSS e JS puros, sem framework e sem build.
 
-**Publicado em 25/11/2026** em **https://persith.github.io/hawk-site/**, pelo GitHub Pages do repositório público `Persith/hawk-site` (branch `main`, pasta raiz). Esse repositório contém só esta pasta.
+**Publicado em 25/11/2026** em **https://assistentehawk.com.br/**, pelo GitHub Pages do repositório público `Persith/hawk-site` (branch `main`, pasta raiz). Esse repositório contém só esta pasta.
 
 **Para republicar depois de mudar algo aqui** (na pasta do projeto, depois de commitar):
 
