@@ -69,3 +69,5 @@ Depois abra `http://127.0.0.1:8765`. Abrir o `index.html` com dois cliques tamb�
 - Um vídeo ou GIF curto do notch abrindo e mostrando a música.
 - Seção "Como funciona a compra", com 3 passos: baixar, testar 7 dias, comprar no app.
 - Imagem de compartilhamento (`og:image`) de 1200×630 com o logo e o notch.
+
+- **Cache:** ao mudar `style.css` ou `loja.js`, troque o `?v=` nos links das páginas HTML, senão quem já visitou continua vendo a versão antiga.
