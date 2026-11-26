@@ -196,7 +196,10 @@
           container.textContent = 'Não foi possível carregar suas compras.';
           return;
         }
-        var rows = Array.isArray(res.data) ? res.data : [];
+        // orders cancelled before reaching Mercado Pago (checkout refused) were never a purchase
+        var rows = (Array.isArray(res.data) ? res.data : []).filter(function (r) {
+          return !(r.status === 'cancelado' && !r.mp_preference_id);
+        });
         if (rows.length === 0) {
           container.textContent = 'Você ainda não fez nenhuma compra.';
           return;
