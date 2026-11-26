@@ -1,5 +1,5 @@
 /* The site's account and shop.
-   - "Entrar" in the header (#acctBtn) signs in with Google (Supabase Auth PKCE, same account as the Hawk app).
+   - "Entrar" in the header (#acctBtn) signs in with Google Identity Services (same account as the Hawk app).
    - First sign-in prompts for the user's nickname (user_metadata.apelido) if missing; it can be edited anytime
      inside "Minha conta", which also lists "Presentes que dei" with copyable/WhatsApp gift links.
    - Every element with class "buy" and data-item="<catalogo id>" opens the buy dialog ("Para mim" or "De presente"
@@ -11,7 +11,7 @@
   var DOWNLOAD_URL = 'https://github.com/Persith/hawk-releases/releases/latest/download/Hawk-Setup.exe';
   var NOTE_MAX = 300;
   var NICK_MAX = 30;
-  var PENDING = 'hawk-buy-pending'; // what to reopen after Google sign-in ("@login" or an item id)
+  var PENDING = 'hawk-buy-pending'; // legacy fallback only for in-flight PKCE redirects during transition
 
   // what the dialog shows for each item (the price charged is always the one in the catalogo table)
   var ITEMS = {
@@ -30,7 +30,6 @@
 
   var GIFT_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
   var ME_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
-  var G_ICO = '<svg class="g-ico" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.2 14.6 2.2 12 2.2 6.6 2.2 2.3 6.5 2.3 11.9s4.3 9.7 9.7 9.7c5.6 0 9.3-3.9 9.3-9.5 0-.6-.1-1.1-.2-1.6H12z"/></svg>';
 
   var sb = null;
   function client() {
@@ -52,6 +51,8 @@
   var nickSkipped = false;
   var returnOrder = null; // { id, retStatus } when back from Mercado Pago
   var returnPollTimer = 0;
+  var gMountSeq = 0;
+  var historyFull = false; // Minha conta showing the whole purchase history
 
   function esc(t) {
     return String(t).replace(/[&<>"]/g, function (c) {
@@ -72,7 +73,7 @@
       : '');
   }
   function needsFirstNick(s) { return !!(s && !nickOf(s) && !nickSkipped); }
-  function itemName(id) { return (ITEMS[id] && ITEMS[id][0]) || id; }
+  function itemName(id) { return (ITEMS[id] && ITEMS[id][0]) || 'Item que saiu da loja'; }
   function giftLinkFor(code) { return new URL('resgatar.html?c=' + encodeURIComponent(code), location.href).toString(); }
   function whatsappHref(link) {
     return 'https://wa.me/?text=' + encodeURIComponent('Te dei um presente no Hawk! Resgate aqui: ' + link);
@@ -93,8 +94,57 @@
   }
   function googleLoginMarkup(text) {
     return '<p>' + text + '</p>' +
-      '<button class="btn btn-light" data-act="google" type="button">' + G_ICO + 'Entrar com Google</button>' +
+      '<div class="g-btn-wrap" id="gBtnMount"><span class="g-loading">Carregando login do Google…</span></div>' +
       '<div class="buy-msg"></div>';
+  }
+  function mountGoogleButton() {
+    var mount = box.querySelector('#gBtnMount');
+    if (!mount) return;
+    if (!window.HawkGoogle) {
+      mount.textContent = '';
+      msg('Não foi possível carregar o login do Google. Verifique a internet e tente de novo.');
+      return;
+    }
+    var seq = ++gMountSeq;
+    window.HawkGoogle.newNonce().then(function (pair) {
+      if (seq !== gMountSeq || !dlg.open || !box.contains(mount)) return;
+      return window.HawkGoogle.renderButton(mount, {
+        nonceHash: pair.hash,
+        onCredential: function (token) {
+          if (seq !== gMountSeq) return;
+          msg('');
+          mount.innerHTML = '<span class="g-wait"><span class="spin" aria-hidden="true"></span>Entrando…</span>';
+          client().auth.signInWithIdToken({
+            provider: 'google',
+            token: token,
+            nonce: pair.raw,
+          }).then(function (r) {
+            if (seq !== gMountSeq) return;
+            if (r && r.error) {
+              msg('Não foi possível entrar com o Google.');
+              if (dlg.open && box.contains(mount)) mountGoogleButton();
+              return;
+            }
+            try { sessionStorage.removeItem(PENDING); } catch (e) { /* ignore */ }
+            syncHeader();
+            render();
+          }, function () {
+            if (seq !== gMountSeq) return;
+            msg('Não foi possível entrar com o Google.');
+            if (dlg.open && box.contains(mount)) mountGoogleButton();
+          });
+        },
+        onError: function (errMsg) {
+          if (seq !== gMountSeq) return;
+          mount.textContent = '';
+          msg(errMsg || 'Não foi possível carregar o login do Google. Verifique a internet e tente de novo.');
+        },
+      });
+    }, function () {
+      if (seq !== gMountSeq) return;
+      mount.textContent = '';
+      msg('Não foi possível iniciar o login com o Google.');
+    });
   }
   function firstNickMarkup(email) {
     return '<p>Conectado como <b>' + esc(email || '') + '</b>. Escolha um nome de usuário para aparecer nos presentes que você enviar.</p>' +
@@ -122,27 +172,41 @@
     }, function () {});
   }
 
-  function renderGiftsList(container) {
-    container.textContent = 'Carregando presentes…';
+  // Purchase history: every order of the user (RLS returns only theirs), newest first. An unpaid order can be
+  // paid from here for 24h (the Mercado Pago link expires at the same time); after that it shows as "Expirada".
+  // full=false shows the last HISTORY_SHORT and a "Ver mais" button.
+  var HISTORY_SHORT = 3;
+  var PAY_WINDOW_MS = 24 * 3600 * 1000;
+  var MP_CHECKOUT = 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=';
+  function formatDateTimeBR(ms) {
+    var d = new Date(ms);
+    function two(n) { return (n < 10 ? '0' : '') + n; }
+    return two(d.getDate()) + '/' + two(d.getMonth() + 1) + ' às ' + two(d.getHours()) + 'h' + two(d.getMinutes());
+  }
+  function renderHistory(container, full) {
+    container.textContent = 'Carregando compras…';
     client()
       .from('pedidos')
-      .select('id, item, status, criado_em, presente_codigo, presente_aplicado_em')
-      .eq('presente', true)
+      .select('id, item, status, criado_em, presente, presente_codigo, presente_aplicado_em, mp_preference_id')
       .order('criado_em', { ascending: false })
-      .limit(20)
+      .limit(full ? 200 : 30)
       .then(function (res) {
         if (!container.isConnected) return;
         if (res.error) {
-          container.textContent = 'Não foi possível carregar seus presentes.';
+          container.textContent = 'Não foi possível carregar suas compras.';
           return;
         }
         var rows = Array.isArray(res.data) ? res.data : [];
         if (rows.length === 0) {
-          container.textContent = 'Você ainda não comprou nenhum presente.';
+          container.textContent = 'Você ainda não fez nenhuma compra.';
           return;
         }
+        var more = !full && rows.length > HISTORY_SHORT;
+        if (!full) rows = rows.slice(0, HISTORY_SHORT);
         container.textContent = '';
         rows.forEach(function (r) {
+          var payUntil = new Date(r.criado_em).getTime() + PAY_WINDOW_MS;
+          var expired = r.status === 'pendente' && Date.now() > payUntil;
           var card = document.createElement('div');
           card.className = 'gift-card';
 
@@ -154,12 +218,21 @@
 
           var badge = document.createElement('span');
           badge.className = 'gift-badge';
-          if (r.status === 'pago' && r.presente_aplicado_em) {
+          if (r.presente && r.status === 'pago' && r.presente_aplicado_em) {
             badge.classList.add('done');
             badge.textContent = 'Resgatado';
-          } else if (r.status === 'pago') {
+          } else if (r.presente && r.status === 'pago') {
             badge.classList.add('ready');
             badge.textContent = 'Pronto para enviar';
+          } else if (r.status === 'pago') {
+            badge.classList.add('ready');
+            badge.textContent = 'Pago';
+          } else if (r.status === 'estornado') {
+            badge.classList.add('cancel');
+            badge.textContent = 'Estornado';
+          } else if (expired) {
+            badge.classList.add('expired');
+            badge.textContent = 'Expirada';
           } else if (r.status === 'pendente') {
             badge.classList.add('wait');
             badge.textContent = 'Aguardando pagamento';
@@ -173,14 +246,34 @@
           var meta = document.createElement('div');
           meta.className = 'gift-meta';
           var dt = formatDateBR(r.criado_em);
-          if (r.status === 'pago' && r.presente_aplicado_em) {
-            meta.textContent = (dt ? 'Comprado em ' + dt + ' · ' : '') + 'Resgatado em ' + formatDateBR(r.presente_aplicado_em);
-          } else {
-            meta.textContent = dt ? 'Comprado em ' + dt : '';
-          }
+          var parts = [];
+          if (dt) parts.push('Comprado em ' + dt);
+          if (r.presente) parts.push('De presente');
+          if (r.presente && r.status === 'pago' && r.presente_aplicado_em) parts.push('Resgatado em ' + formatDateBR(r.presente_aplicado_em));
+          meta.textContent = parts.join(' · ');
           card.appendChild(meta);
 
-          if (r.status === 'pago' && !r.presente_aplicado_em && r.presente_codigo) {
+          if (expired) {
+            var note = document.createElement('div');
+            note.className = 'gift-meta';
+            note.textContent = 'Expirou porque o pagamento não foi feito em até 24 horas.';
+            card.appendChild(note);
+          } else if (r.status === 'pendente' && r.mp_preference_id) {
+            var payNote = document.createElement('div');
+            payNote.className = 'gift-meta';
+            payNote.textContent = 'Pague até ' + formatDateTimeBR(payUntil) + '.';
+            card.appendChild(payNote);
+            var payActs = document.createElement('div');
+            payActs.className = 'gift-actions';
+            var payLink = document.createElement('a');
+            payLink.className = 'btn btn-light btn-sm';
+            payLink.href = MP_CHECKOUT + encodeURIComponent(r.mp_preference_id);
+            payLink.textContent = 'Pagar agora';
+            payActs.appendChild(payLink);
+            card.appendChild(payActs);
+          }
+
+          if (r.presente && r.status === 'pago' && !r.presente_aplicado_em && r.presente_codigo) {
             var link = giftLinkFor(r.presente_codigo);
             var acts = document.createElement('div');
             acts.className = 'gift-actions';
@@ -204,6 +297,14 @@
 
           container.appendChild(card);
         });
+        if (more) {
+          var moreBtn = document.createElement('button');
+          moreBtn.type = 'button';
+          moreBtn.className = 'btn btn-ghost btn-sm history-more';
+          moreBtn.dataset.act = 'history';
+          moreBtn.textContent = 'Ver mais';
+          container.appendChild(moreBtn);
+        }
       });
   }
 
@@ -211,6 +312,7 @@
     clearTimeout(returnPollTimer);
     if (!s) {
       box.innerHTML = header() + googleLoginMarkup('Entre com sua conta Google para ver os detalhes do seu pedido.');
+      mountGoogleButton();
       return;
     }
     box.innerHTML = header() + '<p>Consultando pedido…</p>';
@@ -361,6 +463,16 @@
         return;
       }
 
+      // full purchase history (from "Ver mais" in Minha conta)
+      if (!item && s && historyFull) {
+        box.innerHTML = close() + '<div class="buy-item">Sua conta</div><h3>Histórico de compras</h3>' +
+          '<div class="gifts-list history-full" id="historyList"></div>' +
+          '<div class="buy-row"><button class="btn btn-ghost" data-act="historyback" type="button">Voltar</button>' +
+          '<button class="btn btn-light" data-act="close" type="button">Fechar</button></div>';
+        renderHistory(document.getElementById('historyList'), true);
+        return;
+      }
+
       // account dialog (header button)
       if (!item) {
         box.innerHTML = (s ? header().replace(close(), '').replace('Entrar no Hawk', 'Minha conta') : header()) + (s
@@ -369,13 +481,15 @@
             '<div class="nick-row"><input id="nick" name="nick" maxlength="' + NICK_MAX + '" autocomplete="nickname" placeholder="Como quer ser chamado?" value="' + esc(nickOf(s)) + '">' +
             '<button class="btn btn-ghost" type="submit">Salvar</button></div></form>' +
             '<div class="buy-msg"></div>' +
-            '<div class="gifts-sec"><h4>Presentes que dei</h4><div class="gifts-list" id="giftsList"></div></div>' +
+            '<div class="gifts-sec"><h4>Histórico de compras</h4><div class="gifts-list history-short" id="historyList"></div></div>' +
             '<div class="buy-row"><button class="btn btn-ghost" data-act="close" type="button">Fechar</button>' +
             '<button class="btn btn-danger" data-act="out" type="button">Sair</button></div>'
           : googleLoginMarkup('Entre com sua conta Google para usar o mesmo cadastro no site e no Hawk.'));
         if (s) {
-          var gl = document.getElementById('giftsList');
-          if (gl) renderGiftsList(gl);
+          var hl = document.getElementById('historyList');
+          if (hl) renderHistory(hl, false);
+        } else {
+          mountGoogleButton();
         }
         return;
       }
@@ -383,6 +497,7 @@
       // buy dialog, signed out
       if (!s) {
         box.innerHTML = header() + googleLoginMarkup('Entre com sua conta Google para comprar, para você ou de presente.');
+        mountGoogleButton();
         return;
       }
 
@@ -408,6 +523,7 @@
     returnOrder = null;
     clearTimeout(returnPollTimer);
     item = id || '';
+    historyFull = false;
     if (!item) gift = false;
     render();
     if (!dlg.open) dlg.showModal();
@@ -486,6 +602,8 @@
     if (act === 'pay') pay(null);
     if (act === 'me' || act === 'gift') { gift = act === 'gift'; msg(''); render(); }
     if (act === 'skipnick') { nickSkipped = true; render(); }
+    if (act === 'history') { historyFull = true; render(); }
+    if (act === 'historyback') { historyFull = false; render(); }
     if (act === 'account') { returnOrder = null; clearTimeout(returnPollTimer); item = ''; gift = false; render(); }
     if (act === 'out') {
       spinBtn(b, 'Saindo…');
@@ -496,15 +614,6 @@
       });
     }
     if (act === 'close') { returnOrder = null; clearTimeout(returnPollTimer); dlg.close(); }
-    if (act === 'google') {
-      if (b.classList.contains('loading')) return;
-      spinBtn(b, 'Abrindo o Google…');
-      try { sessionStorage.setItem(PENDING, item || '@login'); } catch (err) { /* private mode */ }
-      var back = location.origin + location.pathname + (item ? '#precos' : '');
-      client().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: back } }).then(function (r) {
-        if (r.error) { msg('Não foi possível entrar com o Google.'); render(); }
-      });
-    }
   });
 
   box.addEventListener('input', function (e) {

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Entrar no Hawk</title>
+  <meta name="theme-color" content="#0a0f3a">
+  <link rel="icon" href="assets/hawk-icone.svg" type="image/svg+xml">
+  <link rel="dns-prefetch" href="https://accounts.google.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261126">
+</head>
+<body>
+
+<header class="top scrolled">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/hawk-icone.svg" alt="">Hawk</a>
+  </div>
+</header>
+
+<main class="redeem-wrap">
+  <div class="redeem-card">
+    <h1>Entrar no Hawk</h1>
+    <p class="redeem-sub">Entre com sua conta Google para usar o Hawk neste PC.</p>
+    <div class="g-btn-wrap" id="hawkGoogleBtn"><span class="g-loading">Carregando login do Google…</span></div>
+    <div class="buy-msg" id="hawkLoginMsg" role="status"></div>
+  </div>
+</main>
+
+<script src="google-login.js?v=20261126"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var porta = (params.get('porta') || '').trim();
+  var estado = (params.get('estado') || '').trim();
+  var nonce = (params.get('nonce') || '').trim();
+
+  var btnWrap = document.getElementById('hawkGoogleBtn');
+  var msgEl = document.getElementById('hawkLoginMsg');
+
+  var valid =
+    porta === '53390' &&
+    /^[0-9a-f]{32,64}$/i.test(estado) &&
+    /^[0-9a-f]{64}$/i.test(nonce) &&
+    !!window.HawkGoogle;
+
+  if (!valid) {
+    btnWrap.hidden = true;
+    btnWrap.textContent = '';
+    msgEl.textContent = 'Link de login inválido. Volte ao Hawk e clique em Entrar de novo.';
+    return;
+  }
+
+  function showError(text) {
+    msgEl.textContent = text || 'Não foi possível entrar com o Google.';
+  }
+
+  window.HawkGoogle.renderButton(btnWrap, {
+    nonceHash: nonce.toLowerCase(),
+    onCredential: function (token) {
+      msgEl.textContent = '';
+      btnWrap.innerHTML = '<span class="g-wait"><span class="spin" aria-hidden="true"></span>Concluindo entrada…</span>';
+      location.replace(
+        'http://127.0.0.1:' + porta +
+        '/auth/callback?estado=' + encodeURIComponent(estado) +
+        '&id_token=' + encodeURIComponent(token)
+      );
+    },
+    onError: function (errMsg) {
+      btnWrap.textContent = '';
+      showError(errMsg);
+    },
+  });
+})();
+</script>
+</body>
+</html>
