@@ -59,17 +59,10 @@
   var SUPABASE_URL = 'https://qtflyunebpskussorwjf.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_IxdUmnST3w6mZGwqg0JdTQ_S7dfWT-Y';
   var DOWNLOAD_URL = 'https://github.com/Persith/hawk-releases/releases/latest/download/Hawk-Setup.exe';
-  var CODE_STORE = 'hawk-redeem-code';
   var gMountSeq = 0;
 
   var params = new URLSearchParams(location.search);
   var code = (params.get('c') || '').trim();
-  if (!code) {
-    try {
-      code = (sessionStorage.getItem(CODE_STORE) || '').trim();
-      sessionStorage.removeItem(CODE_STORE);
-    } catch (e) { code = ''; }
-  }
 
   var titleEl = document.getElementById('redeemTitle');
   var subEl = document.getElementById('redeemSub');
@@ -81,7 +74,7 @@
 
   var sb = window.supabase
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-        auth: { flowType: 'pkce', persistSession: true, detectSessionInUrl: true },
+        auth: { persistSession: true, detectSessionInUrl: false },
       })
     : null;
 
@@ -203,7 +196,6 @@
               if (wrap.isConnected) mountRedeemGoogle(wrap);
               return;
             }
-            try { sessionStorage.removeItem(CODE_STORE); } catch (e) { /* ignore */ }
             load();
           }, function () {
             if (seq !== gMountSeq) return;

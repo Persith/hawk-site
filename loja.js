@@ -11,7 +11,6 @@
   var DOWNLOAD_URL = 'https://github.com/Persith/hawk-releases/releases/latest/download/Hawk-Setup.exe';
   var NOTE_MAX = 300;
   var NICK_MAX = 30;
-  var PENDING = 'hawk-buy-pending'; // legacy fallback only for in-flight PKCE redirects during transition
 
   // what the dialog shows for each item (the price charged is always the one in the catalogo table)
   var ITEMS = {
@@ -31,11 +30,33 @@
   var GIFT_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
   var ME_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
 
+  // Prices: the catalogo table is what the checkout charges, so every price on the page is read from it.
+  // Elements with data-price="<id>" get that item's price; data-price-sum="a,b" gets the sum (the struck price).
+  function brl(cents) { return 'R$ ' + (cents / 100).toFixed(2).replace('.', ','); }
+  function loadPrices() {
+    client().from('catalogo').select('id, preco_centavos').then(function (res) {
+      var price = {};
+      (res.data || []).forEach(function (r) { if (r.preco_centavos > 0) price[r.id] = r.preco_centavos; });
+      Object.keys(price).forEach(function (id) { if (ITEMS[id]) ITEMS[id][1] = brl(price[id]); });
+      document.querySelectorAll('[data-price]').forEach(function (el) {
+        var c = price[el.dataset.price];
+        if (c) el.textContent = brl(c);
+      });
+      document.querySelectorAll('[data-price-sum]').forEach(function (el) {
+        var ids = el.dataset.priceSum.split(',');
+        var total = 0;
+        for (var i = 0; i < ids.length; i++) { if (!price[ids[i]]) return; total += price[ids[i]]; }
+        el.textContent = brl(total);
+      });
+      if (dlg.open && item) render();
+    });
+  }
+
   var sb = null;
   function client() {
     if (!sb && window.supabase) {
       sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-        auth: { flowType: 'pkce', persistSession: true, detectSessionInUrl: true },
+        auth: { persistSession: true, detectSessionInUrl: false },
       });
     }
     return sb;
@@ -125,7 +146,6 @@
               if (dlg.open && box.contains(mount)) mountGoogleButton();
               return;
             }
-            try { sessionStorage.removeItem(PENDING); } catch (e) { /* ignore */ }
             syncHeader();
             render();
           }, function () {
@@ -183,14 +203,34 @@
     function two(n) { return (n < 10 ? '0' : '') + n; }
     return two(d.getDate()) + '/' + two(d.getMonth() + 1) + ' às ' + two(d.getHours()) + 'h' + two(d.getMinutes());
   }
+  // What the signed-in user already owns, to avoid offering to pay a pending order for it again
+  function ownedItems() {
+    var c = client();
+    return Promise.all([
+      c.from('licencas').select('plano').maybeSingle(),
+      c.from('pacotes_comprados').select('pacote_id'),
+      c.from('olhos_comprados').select('olho_id'),
+    ]).then(function (r) {
+      var owned = {};
+      var lic = r[0].data && r[0].data.plano === 'vitalicio';
+      if (lic) owned.licenca = true;
+      (r[1].data || []).forEach(function (x) { owned[x.pacote_id] = true; });
+      (r[2].data || []).forEach(function (x) { owned[x.olho_id] = true; });
+      if (lic && owned['pacote-dev'] && owned['pacote-lan'] && owned['pacote-ia']) owned['hawk-completo'] = true;
+      return owned;
+    }, function () { return {}; });
+  }
+
   function renderHistory(container, full) {
     container.textContent = 'Carregando compras…';
-    client()
+    Promise.all([client()
       .from('pedidos')
       .select('id, item, status, criado_em, presente, presente_codigo, presente_aplicado_em, mp_preference_id')
       .order('criado_em', { ascending: false })
-      .limit(full ? 200 : 30)
-      .then(function (res) {
+      .limit(full ? 200 : 30), ownedItems()])
+      .then(function (all) {
+        var res = all[0];
+        var owned = all[1];
         if (!container.isConnected) return;
         if (res.error) {
           container.textContent = 'Não foi possível carregar suas compras.';
@@ -261,6 +301,11 @@
             note.className = 'gift-meta';
             note.textContent = 'Expirou porque o pagamento não foi feito em até 24 horas.';
             card.appendChild(note);
+          } else if (r.status === 'pendente' && !r.presente && owned[r.item]) {
+            var ownNote = document.createElement('div');
+            ownNote.className = 'gift-meta';
+            ownNote.textContent = 'Você já tem este item, não precisa pagar este pedido.';
+            card.appendChild(ownNote);
           } else if (r.status === 'pendente' && r.mp_preference_id) {
             var payNote = document.createElement('div');
             payNote.className = 'gift-meta';
@@ -672,11 +717,8 @@
     return;
   }
 
-  var pending = '';
-  try { pending = sessionStorage.getItem(PENDING) || ''; sessionStorage.removeItem(PENDING); } catch (err) { pending = ''; }
-  if (pending && client()) {
-    session().then(function () { open(pending === '@login' ? '' : (ITEMS[pending] ? pending : '')); });
-  } else if (client()) {
+  if (client()) loadPrices();
+  if (client()) {
     // First visit right after Google sign-in without a pending dialog
     session().then(function (s) {
       if (needsFirstNick(s) && !dlg.open) open('');
