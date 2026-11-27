@@ -327,6 +327,7 @@ section { padding: 56px 0; }
 .feature-card.stack { grid-template-columns: 1fr; gap: 36px; }
 .stack-text { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; }
 .stack-text p { margin-top: 0; }
+.stack-text .pack-note { margin-top: 18px; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
 
 /* Panel mockups built in HTML (crisper than small prints) */
 .mock {
